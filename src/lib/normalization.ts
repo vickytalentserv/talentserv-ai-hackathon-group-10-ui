@@ -28,7 +28,7 @@ export function normalizeCity(value?: string): string {
     return 'Unknown'
   }
 
-  return CITY_ALIASES[normalized] ?? titleCase(value)
+  return CITY_ALIASES[normalized] ?? titleCase(normalized)
 }
 
 export function normalizeLocality(value?: string): string {
@@ -37,7 +37,7 @@ export function normalizeLocality(value?: string): string {
     return 'Unknown'
   }
 
-  return LOCALITY_ALIASES[normalized] ?? titleCase(value)
+  return LOCALITY_ALIASES[normalized] ?? titleCase(normalized)
 }
 
 export function normalizeTransactionType(value?: string): TransactionType {
