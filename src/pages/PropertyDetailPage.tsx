@@ -1,9 +1,10 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { ArrowLeft, Bath, BedDouble, ExternalLink, Heart, Loader2, MapPin, Maximize2, Phone, Star } from 'lucide-react'
+import { ArrowLeft, Bath, BedDouble, ExternalLink, GitCompare, Heart, Loader2, MapPin, Maximize2, Phone, Star } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { fetchProperty } from '@/api/client'
 import { usePropertyContext } from '@/context/PropertyContext'
+import { useCompareContext } from '@/context/CompareContext'
 import { AppShell } from '@/components/layout/AppShell'
 import { ContactInquiryModal } from '@/components/properties/ContactInquiryModal'
 import { parseRoutePropertyId, toRoutePropertyId } from '@/lib/listingKeys'
@@ -19,6 +20,7 @@ export function PropertyDetailPage() {
   const { propertyId = '' } = useParams()
   const navigate = useNavigate()
   const { findProperty, favorites, toggleFavorite } = usePropertyContext()
+  const { isInCompare, toggleCompare, canAddToCompare } = useCompareContext()
   const { user } = useAuth0()
 
   const [property, setProperty] = useState<PropertyListing | null>(null)
@@ -76,6 +78,8 @@ export function PropertyDetailPage() {
   }, [findProperty, propertyId, routeParts.dbId, routeParts.mockId])
 
   const isFavorite = property ? favorites.has(property.id) : false
+  const compareSelected = property ? isInCompare(property.id) : false
+  const compareDisabled = property ? !compareSelected && !canAddToCompare : true
 
   const priceLabel =
     property?.listingStatus === 'rent'
@@ -171,10 +175,19 @@ export function PropertyDetailPage() {
                   <Button
                     variant="outline"
                     className="gap-2"
+                    disabled={compareDisabled}
+                    onClick={() => property && toggleCompare(property)}
+                  >
+                    <GitCompare className="h-4 w-4" />
+                    {compareSelected ? 'Added to compare' : 'Add to compare'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-2"
                     onClick={() => void toggleFavorite(property.id)}
                   >
                     <Heart className={cn('h-4 w-4', isFavorite && 'fill-current text-primary')} />
-                    {isFavorite ? 'Saved' : 'Save property'}
+                    {isFavorite ? 'Shortlisted' : 'Shortlist'}
                   </Button>
                   {property.sourceUrl && (
                     <Button variant="outline" className="gap-2" asChild>

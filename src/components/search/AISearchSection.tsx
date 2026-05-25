@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import { motion } from 'framer-motion'
 import { Loader2, Search, Sparkles } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { parseRequirement, saveRequirement, type ParsedRequirement } from '@/api/client'
 import { auth0Audience } from '@/config'
 import { EXAMPLE_PROMPTS } from '@/data/mockProperties'
@@ -22,6 +22,12 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [focused, setFocused] = useState(false)
+
+  useEffect(() => {
+    if (initialText) {
+      setText(initialText)
+    }
+  }, [initialText])
 
   async function handleSearch() {
     if (!text.trim()) {

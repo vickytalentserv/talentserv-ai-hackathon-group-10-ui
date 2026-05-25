@@ -61,8 +61,8 @@ export function mapMatchedItemToListing(
 }
 
 export function mergeProperties(apiItems: ApiProperty[]): PropertyListing[] {
-  const mapped = apiItems.map(mapApiPropertyToListing)
-  const existingIds = new Set(mapped.map((p) => p.city + p.title))
-  const extras = MOCK_PROPERTIES.filter((p) => !existingIds.has(p.city + p.title))
-  return [...mapped, ...extras]
+  if (apiItems.length === 0) {
+    return MOCK_PROPERTIES
+  }
+  return apiItems.map(mapApiPropertyToListing)
 }

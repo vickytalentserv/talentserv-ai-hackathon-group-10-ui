@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchProperties } from '@/api/client'
 import { usePropertyContext } from '@/context/PropertyContext'
 import { AppShell } from '@/components/layout/AppShell'
 import { ContactInquiryModal } from '@/components/properties/ContactInquiryModal'
+import { CompareSelectionBanner } from '@/components/properties/CompareSelectionBanner'
 import { PropertyFiltersBar } from '@/components/properties/PropertyFiltersBar'
 import { PropertyGrid } from '@/components/properties/PropertyGrid'
 import { filterProperties } from '@/lib/propertyFilters'
@@ -25,6 +26,7 @@ const defaultFilters: PropertyFilters = {
 }
 
 const PAGE_SIZE = 9
+const DEFAULT_CITIES = ['Bengaluru', 'Mumbai', 'Pune']
 
 function applyLocalFilters(items: PropertyListing[], filters: PropertyFilters): PropertyListing[] {
   let result = [...items]
@@ -43,6 +45,8 @@ function applyLocalFilters(items: PropertyListing[], filters: PropertyFilters): 
 export function PropertiesPage() {
   const navigate = useNavigate()
   const { properties: catalogProperties, favorites, toggleFavorite } = usePropertyContext()
+  const catalogRef = useRef(catalogProperties)
+  catalogRef.current = catalogProperties
   const [filters, setFilters] = useState<PropertyFilters>(defaultFilters)
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [page, setPage] = useState(1)
@@ -108,7 +112,10 @@ export function PropertiesPage() {
         }
 
         setUseServer(false)
-        const fallback = applyLocalFilters(filterProperties(catalogProperties, activeFilters), activeFilters)
+        const fallback = applyLocalFilters(
+          filterProperties(catalogRef.current, activeFilters),
+          activeFilters,
+        )
         setTotal(fallback.length)
         const sliceEnd = page * PAGE_SIZE
         setListings(fallback.slice(0, sliceEnd))
@@ -124,16 +131,16 @@ export function PropertiesPage() {
     return () => {
       cancelled = true
     }
-  }, [activeFilters, appendResults, page, catalogProperties])
+  }, [activeFilters, appendResults, page])
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const hasMore = page < totalPages
 
   const cityOptions = useMemo(() => {
-    const cities = new Set(catalogProperties.map((property) => property.city))
+    const cities = new Set(DEFAULT_CITIES)
     listings.forEach((property) => cities.add(property.city))
     return [...cities].sort()
-  }, [catalogProperties, listings])
+  }, [listings])
 
   function handleLoadMore() {
     setAppendResults(true)
@@ -166,6 +173,8 @@ export function PropertiesPage() {
 
         <PropertyFiltersBar filters={filters} cities={cityOptions} onChange={setFilters} />
 
+        <CompareSelectionBanner />
+
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>
             Showing {listings.length} of {total} results
@@ -177,6 +186,7 @@ export function PropertiesPage() {
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
           loading={loading && page === 1}
+          showCompareAction
           onContactProperty={setContactProperty}
           onViewProperty={(property) => navigate(`/properties/${toRoutePropertyId(property.id)}`)}
         />

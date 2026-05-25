@@ -1,8 +1,9 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { Building2, Heart, LayoutDashboard, LogOut, Menu, Moon, Sun, X } from 'lucide-react'
+import { Building2, GitCompare, Heart, LayoutDashboard, LogOut, Menu, Moon, Sun, Upload, X } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { auth0Config } from '@/config'
+import { useCompareContext } from '@/context/CompareContext'
 import { cn } from '@/lib/utils'
 import { resolveDisplayEmail, resolveDisplayName } from '@/utils/profile'
 import { Button } from '@/components/ui/button'
@@ -17,11 +18,14 @@ interface AppShellProps {
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/properties', label: 'Properties', icon: Building2 },
-  { to: '/saved', label: 'Saved', icon: Heart },
+  { to: '/compare', label: 'Compare', icon: GitCompare },
+  { to: '/upload', label: 'Upload Data', icon: Upload },
+  { to: '/saved', label: 'Shortlist', icon: Heart },
 ]
 
 export function AppShell({ children, profileName, profilePicture }: AppShellProps) {
   const { user, logout } = useAuth0()
+  const { compareCount } = useCompareContext()
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window === 'undefined') {
       return false
@@ -74,7 +78,7 @@ export function AppShell({ children, profileName, profilePicture }: AppShellProp
                   to={to}
                   className={({ isActive }) =>
                     cn(
-                      'inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'relative inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       isActive
                         ? 'bg-accent text-accent-foreground'
                         : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -83,6 +87,11 @@ export function AppShell({ children, profileName, profilePicture }: AppShellProp
                 >
                   <Icon className="h-4 w-4" />
                   {label}
+                  {to === '/compare' && compareCount > 0 && (
+                    <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                      {compareCount}
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>
@@ -139,6 +148,11 @@ export function AppShell({ children, profileName, profilePicture }: AppShellProp
                 >
                   <Icon className="h-4 w-4" />
                   {label}
+                  {to === '/compare' && compareCount > 0 && (
+                    <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                      {compareCount}
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>

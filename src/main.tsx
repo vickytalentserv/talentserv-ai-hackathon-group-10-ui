@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { Auth0ProviderWithNavigate } from './auth/Auth0ProviderWithNavigate'
 import { PropertyProvider } from './context/PropertyContext'
+import { CompareProvider } from './context/CompareContext'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Auth0ProviderWithNavigate>
         <PropertyProvider>
-          <App />
+          <CompareProvider>
+            <App />
+          </CompareProvider>
         </PropertyProvider>
       </Auth0ProviderWithNavigate>
     </BrowserRouter>

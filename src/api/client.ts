@@ -311,3 +311,108 @@ export async function createInquiry(
 
   return response.json()
 }
+
+export interface UploadTemplate {
+  dataset_type: string
+  table: string
+  columns: string[]
+  notes: string[]
+}
+
+export interface UploadResponse {
+  dataset_type: string
+  filename: string
+  rows_read: number
+  rows_inserted: number
+  rows_updated: number
+  rows_skipped: number
+  errors: string[]
+}
+
+export async function fetchUploadTemplate(datasetType: string): Promise<UploadTemplate> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/data/upload/templates/${datasetType}`)
+
+  if (response.status === 404) {
+    const { getUploadTemplateFallback } = await import('@/data/uploadTemplates')
+    const fallback = getUploadTemplateFallback(datasetType)
+    if (fallback) {
+      return fallback
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(`Template fetch failed: ${response.status}`)
+  }
+
+  return response.json()
+}
+
+export async function uploadDataset(
+  accessToken: string,
+  file: File,
+  datasetType: string,
+): Promise<UploadResponse> {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('dataset_type', datasetType)
+
+  const response = await fetch(`${apiBaseUrl}/api/v1/data/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const detail = await response.text()
+    throw new Error(detail || `Upload failed: ${response.status}`)
+  }
+
+  return response.json()
+}
+
+export interface ScrapeSourceResult {
+  source: string
+  fetched: number
+  parsed: number
+  blocked_by_robots: boolean
+  errors: string[]
+}
+
+export interface ScrapeResponse {
+  city: string
+  listing_status: string
+  rows_read: number
+  rows_inserted: number
+  rows_updated: number
+  rows_skipped: number
+  sources: ScrapeSourceResult[]
+  errors: string[]
+}
+
+export async function scrapeListings(
+  accessToken: string,
+  payload: {
+    sources: string[]
+    city: string
+    listing_status: 'for_sale' | 'for_rent'
+    max_results?: number
+  },
+): Promise<ScrapeResponse> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/data/scrape`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const detail = await response.text()
+    throw new Error(detail || `Scrape failed: ${response.status}`)
+  }
+
+  return response.json()
+}

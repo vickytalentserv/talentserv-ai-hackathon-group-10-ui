@@ -7,6 +7,8 @@ import { HomePage } from '@/pages/HomePage'
 import { PropertiesPage } from '@/pages/PropertiesPage'
 import { PropertyDetailPage } from '@/pages/PropertyDetailPage'
 import { SavedPage } from '@/pages/SavedPage'
+import { DataUploadPage } from '@/pages/DataUploadPage'
+import { ComparePage } from '@/pages/ComparePage'
 
 export default function App() {
   const { isAuthenticated, isLoading } = useAuth0()
@@ -57,6 +59,22 @@ export default function App() {
         element={
           <ProtectedRoute>
             <SavedPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/compare"
+        element={
+          <ProtectedRoute>
+            <ComparePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/upload"
+        element={
+          <ProtectedRoute>
+            <DataUploadPage />
           </ProtectedRoute>
         }
       />

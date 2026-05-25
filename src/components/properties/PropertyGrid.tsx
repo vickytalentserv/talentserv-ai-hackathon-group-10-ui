@@ -9,9 +9,11 @@ interface PropertyGridProps {
   favorites: Set<string>
   onToggleFavorite: (id: string) => void | Promise<void>
   loading?: boolean
+  variant?: 'default' | 'large'
   emptyTitle?: string
   emptyDescription?: string
   showMatchDetails?: boolean
+  showCompareAction?: boolean
   onContactProperty?: (property: PropertyListing) => void
   onViewProperty?: (property: PropertyListing) => void
 }
@@ -21,17 +23,25 @@ export function PropertyGrid({
   favorites,
   onToggleFavorite,
   loading = false,
+  variant = 'default',
   emptyTitle = 'No properties found',
   emptyDescription = 'Try adjusting your search or filters to see more listings.',
   showMatchDetails = false,
+  showCompareAction = false,
   onContactProperty,
   onViewProperty,
 }: PropertyGridProps) {
+  const isLarge = variant === 'large'
+  const gridClass = isLarge
+    ? 'grid gap-8 md:grid-cols-2'
+    : 'grid gap-6 sm:grid-cols-2 xl:grid-cols-3'
+  const skeletonCount = isLarge ? 4 : 6
+
   if (loading) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <PropertyCardSkeleton key={index} />
+      <div className={gridClass}>
+        {Array.from({ length: skeletonCount }).map((_, index) => (
+          <PropertyCardSkeleton key={index} size={variant} />
         ))}
       </div>
     )
@@ -48,7 +58,7 @@ export function PropertyGrid({
   }
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div className={gridClass}>
       {properties.map((property, index) => (
         <PropertyCard
           key={property.id}
@@ -56,7 +66,9 @@ export function PropertyGrid({
           isFavorite={favorites.has(property.id)}
           onToggleFavorite={onToggleFavorite}
           index={index}
+          size={variant}
           showMatchDetails={showMatchDetails}
+          showCompareAction={showCompareAction}
           onContact={onContactProperty}
           onViewDetails={onViewProperty}
         />

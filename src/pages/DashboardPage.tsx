@@ -1,5 +1,5 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   fetchLatestRequirement,
@@ -26,6 +26,7 @@ import {
 import { PriceIndexTrend } from '@/components/dashboard/PriceIndexTrend'
 import { PriceInsightCards, TrendingLocations } from '@/components/dashboard/TrendingLocations'
 import { PropertyGrid } from '@/components/properties/PropertyGrid'
+import { CompareSelectionBanner } from '@/components/properties/CompareSelectionBanner'
 import { ContactInquiryModal } from '@/components/properties/ContactInquiryModal'
 import {
   filterByParsedRequirement,
@@ -35,7 +36,6 @@ import {
 import { mapMatchedItemToListing, mergeProperties } from '@/lib/propertyMapper'
 import { toRoutePropertyId } from '@/lib/listingKeys'
 import { resolveDisplayEmail, resolveDisplayName } from '@/utils/profile'
-import { requirementToParsed } from '@/utils/requirements'
 import { Pagination } from '@/components/ui/pagination'
 import { Badge } from '@/components/ui/badge'
 import type { PropertyListing } from '@/types/property'
@@ -55,16 +55,25 @@ export function DashboardPage() {
   const [searchResults, setSearchResults] = useState<PropertyListing[]>([])
   const [matchSource, setMatchSource] = useState<MatchSource>(null)
   const [contactProperty, setContactProperty] = useState<PropertyListing | null>(null)
+  const [savedSearchText, setSavedSearchText] = useState('')
   const [page, setPage] = useState(1)
+  const [searchPage, setSearchPage] = useState(1)
   const pageSize = 6
+  const searchPageSize = 4
+  const propertiesRef = useRef(properties)
+  propertiesRef.current = properties
 
   const displayName = resolveDisplayName(profile?.name, user)
 
   useEffect(() => {
     let cancelled = false
 
-    async function loadData() {
-      try {
+    async function loadDashboardData() {
+      const catalogPromise = fetchProperties(1, 12)
+        .then((response) => mergeProperties(response.items))
+        .catch(() => null)
+
+      async function loadProfile() {
         const token = await getAccessTokenSilently({
           authorizationParams: { audience: auth0Audience },
         })
@@ -85,51 +94,35 @@ export function DashboardPage() {
         }
 
         const latest = await fetchLatestRequirement(token)
+        return { data, latest }
+      }
 
-        if (!cancelled) {
-          setProfile(data)
-          if (latest) {
-            setParsedRequirement(requirementToParsed(latest))
-          }
-        }
-      } catch {
-        // Profile is optional for dashboard browsing
-      } finally {
-        if (!cancelled) {
-          setLoadingProfile(false)
+      const [catalog, profileResult] = await Promise.allSettled([catalogPromise, loadProfile()])
+
+      if (cancelled) {
+        return
+      }
+
+      if (catalog.status === 'fulfilled' && catalog.value) {
+        setProperties(catalog.value)
+      }
+
+      if (profileResult.status === 'fulfilled') {
+        setProfile(profileResult.value.data)
+        if (profileResult.value.latest) {
+          setSavedSearchText(profileResult.value.latest.raw_text)
         }
       }
+
+      setLoadingCatalog(false)
+      setLoadingProfile(false)
     }
 
-    void loadData()
+    void loadDashboardData()
     return () => {
       cancelled = true
     }
-  }, [getAccessTokenSilently, user, setParsedRequirement])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadProperties() {
-      try {
-        const response = await fetchProperties(1, 50)
-        if (!cancelled) {
-          setProperties(mergeProperties(response.items))
-        }
-      } catch {
-        // Fall back to mock data already in context
-      } finally {
-        if (!cancelled) {
-          setLoadingCatalog(false)
-        }
-      }
-    }
-
-    void loadProperties()
-    return () => {
-      cancelled = true
-    }
-  }, [setProperties])
+  }, [getAccessTokenSilently, user, setProperties])
 
   useEffect(() => {
     if (!parsedRequirement) {
@@ -142,7 +135,7 @@ export function DashboardPage() {
 
     async function runMatch() {
       setLoadingMatches(true)
-      setPage(1)
+      setSearchPage(1)
 
       try {
         const response = await matchProperties({ text: parsedRequirement!.raw_text })
@@ -158,7 +151,7 @@ export function DashboardPage() {
           return
         }
 
-        const fallback = filterByParsedRequirement(properties, parsedRequirement)
+        const fallback = filterByParsedRequirement(propertiesRef.current, parsedRequirement)
         setSearchResults(fallback)
         setMatchSource('fallback')
       } finally {
@@ -172,13 +165,25 @@ export function DashboardPage() {
     return () => {
       cancelled = true
     }
-  }, [parsedRequirement?.raw_text, properties, setParsedRequirement])
+  }, [parsedRequirement?.raw_text, setParsedRequirement])
 
-  const displayedProperties = parsedRequirement ? searchResults : properties
+  const isSearchMode = Boolean(parsedRequirement)
+  const resultsLabel = isSearchMode
+    ? matchSource === 'database'
+      ? `${searchResults.length} matches from database`
+      : matchSource === 'fallback'
+        ? `${searchResults.length} offline matches (API unavailable)`
+        : `${searchResults.length} listings match your AI search`
+    : `${properties.length} listings available now`
 
   const paginated = useMemo(
-    () => paginateProperties(displayedProperties, page, pageSize),
-    [displayedProperties, page],
+    () => paginateProperties(properties, page, pageSize),
+    [properties, page],
+  )
+
+  const searchPaginated = useMemo(
+    () => paginateProperties(searchResults, searchPage, searchPageSize),
+    [searchResults, searchPage],
   )
 
   const stats = useMemo(() => getDashboardStats(properties), [properties])
@@ -190,25 +195,54 @@ export function DashboardPage() {
   )
 
   useEffect(() => {
-    setPage(1)
+    setSearchPage(1)
   }, [parsedRequirement?.raw_text])
-
-  const isSearchMode = Boolean(parsedRequirement)
-  const resultsLabel = isSearchMode
-    ? matchSource === 'database'
-      ? `${displayedProperties.length} matches from database`
-      : matchSource === 'fallback'
-        ? `${displayedProperties.length} offline matches (API unavailable)`
-        : `${displayedProperties.length} listings match your AI search`
-    : `${displayedProperties.length} listings available now`
 
   return (
     <AppShell profileName={displayName} profilePicture={profile?.picture ?? user?.picture}>
       <div className="space-y-8">
         <AISearchSection
-          initialText={parsedRequirement?.raw_text ?? ''}
+          initialText={savedSearchText || parsedRequirement?.raw_text || ''}
           onSearch={setParsedRequirement}
         />
+
+        <CompareSelectionBanner />
+
+        {isSearchMode && (
+          <section className="space-y-5 rounded-2xl border border-border bg-card/50 p-6 shadow-sm sm:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Matching properties</h2>
+                <p className="mt-1 text-muted-foreground">{resultsLabel}</p>
+              </div>
+              {matchSource === 'database' && <Badge variant="success">Database matches</Badge>}
+              {matchSource === 'fallback' && <Badge variant="warning">Offline fallback</Badge>}
+              {!matchSource && loadingMatches && <Badge variant="secondary">Matching…</Badge>}
+            </div>
+
+            <PropertyGrid
+              properties={searchPaginated.items}
+              favorites={favorites}
+              onToggleFavorite={toggleFavorite}
+              loading={loadingMatches}
+              variant="large"
+              showCompareAction
+              showMatchDetails={matchSource === 'database'}
+              onContactProperty={setContactProperty}
+              onViewProperty={(property) => navigate(`/properties/${toRoutePropertyId(property.id)}`)}
+              emptyTitle="No matching properties"
+              emptyDescription="Try a different prompt — mention city, BHK, budget, or buy/rent intent."
+            />
+
+            {searchPaginated.totalPages > 1 && (
+              <Pagination
+                page={searchPage}
+                totalPages={searchPaginated.totalPages}
+                onPageChange={setSearchPage}
+              />
+            )}
+          </section>
+        )}
 
         <StatsWidgets stats={stats} />
 
@@ -227,48 +261,37 @@ export function DashboardPage() {
           />
         </section>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <section className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-semibold tracking-tight">
-                    {isSearchMode ? 'Matching properties' : 'Featured properties'}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">{resultsLabel}</p>
+        {!isSearchMode && (
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <section className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-xl font-semibold tracking-tight">Featured properties</h2>
+                    <p className="text-sm text-muted-foreground">{resultsLabel}</p>
+                  </div>
                 </div>
-                {isSearchMode && matchSource === 'database' && (
-                  <Badge variant="success">Database matches</Badge>
-                )}
-                {isSearchMode && matchSource === 'fallback' && (
-                  <Badge variant="warning">Offline fallback</Badge>
-                )}
-                {isSearchMode && !matchSource && loadingMatches && (
-                  <Badge variant="secondary">Matching…</Badge>
-                )}
-              </div>
 
-              <PropertyGrid
-                properties={paginated.items}
-                favorites={favorites}
-                onToggleFavorite={toggleFavorite}
-                loading={loadingCatalog || loadingMatches}
-                showMatchDetails={isSearchMode && matchSource === 'database'}
-                onContactProperty={setContactProperty}
-                onViewProperty={(property) => navigate(`/properties/${toRoutePropertyId(property.id)}`)}
-                emptyTitle="No matching properties"
-                emptyDescription="Try a different prompt — mention city, BHK, budget, or buy/rent intent."
-              />
+                <PropertyGrid
+                  properties={paginated.items}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavorite}
+                  loading={loadingCatalog}
+                  showCompareAction
+                  onContactProperty={setContactProperty}
+                  onViewProperty={(property) => navigate(`/properties/${toRoutePropertyId(property.id)}`)}
+                />
 
-              <Pagination page={page} totalPages={paginated.totalPages} onPageChange={setPage} />
-            </section>
+                <Pagination page={page} totalPages={paginated.totalPages} onPageChange={setPage} />
+              </section>
+            </div>
+
+            <div className="space-y-6">
+              <CategoryBreakdown stats={stats} />
+              <RecentActivityPanel properties={properties} />
+            </div>
           </div>
-
-          <div className="space-y-6">
-            <CategoryBreakdown stats={stats} />
-            <RecentActivityPanel properties={properties} />
-          </div>
-        </div>
+        )}
 
         {!loadingProfile && profile && (
           <section className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
