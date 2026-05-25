@@ -1,0 +1,58 @@
+[
+  {
+    "projectName": "Green Heights",
+    "sentimentScore": 78,
+    "positiveThemes": ["IT park proximity", "good ventilation", "practical floor plans"],
+    "negativeThemes": ["approach road traffic", "visitor parking"],
+    "commentCount": 126,
+    "sentimentSummary": "Public comments are mostly favorable for end-use buyers who prioritize Hinjewadi office access."
+  },
+  {
+    "projectName": "Parklane Homes",
+    "sentimentScore": 68,
+    "positiveThemes": ["affordable ticket size", "near offices", "resale availability"],
+    "negativeThemes": ["older amenities", "maintenance follow-up"],
+    "commentCount": 72,
+    "sentimentSummary": "Discussion is value-oriented with moderate concern around upkeep."
+  },
+  {
+    "projectName": "Urban Nest",
+    "sentimentScore": 75,
+    "positiveThemes": ["amenity planning", "Wakad connectivity", "investment interest"],
+    "negativeThemes": ["possession clarity", "construction noise"],
+    "commentCount": 94,
+    "sentimentSummary": "Interest is healthy for buyers comfortable with under-construction inventory."
+  },
+  {
+    "projectName": "Elite Crest",
+    "sentimentScore": 82,
+    "positiveThemes": ["premium specifications", "Baner social infrastructure", "resale demand"],
+    "negativeThemes": ["expensive entry price", "traffic congestion"],
+    "commentCount": 143,
+    "sentimentSummary": "Premium buyers rate the project highly, especially for lifestyle and appreciation potential."
+  },
+  {
+    "projectName": "Elite Crest Phase 2",
+    "sentimentScore": 76,
+    "positiveThemes": ["brand trust", "launch inventory", "Baner demand"],
+    "negativeThemes": ["delivery wait", "additional charges"],
+    "commentCount": 61,
+    "sentimentSummary": "Early-stage sentiment is positive but more cautious than the completed phase."
+  },
+  {
+    "projectName": "Tech Park Residency",
+    "sentimentScore": 84,
+    "positiveThemes": ["walkable offices", "managed society", "tenant community"],
+    "negativeThemes": ["rent increases", "deposit negotiation"],
+    "commentCount": 188,
+    "sentimentSummary": "Tenant sentiment is strong for Whitefield office access and society operations."
+  },
+  {
+    "projectName": "Sobha Cityscape",
+    "sentimentScore": 80,
+    "positiveThemes": ["construction quality", "family amenities", "open space"],
+    "negativeThemes": ["commute variance", "maintenance cost"],
+    "commentCount": 111,
+    "sentimentSummary": "Reviews are favorable for families who can manage the commute trade-off."
+  }
+]

@@ -1,0 +1,47 @@
+[
+  {
+    "city": "Pune",
+    "locality": "Hinjewadi",
+    "keyword": "Hinjewadi 2 BHK ready to move",
+    "trendScore": 83,
+    "trendDirection": "rising",
+    "comparedLocalities": ["Wakad", "Baner"],
+    "trendSummary": "Demand is rising around IT employment clusters and metro corridor expectations."
+  },
+  {
+    "city": "Pune",
+    "locality": "Wakad",
+    "keyword": "Wakad new projects investment",
+    "trendScore": 79,
+    "trendDirection": "stable",
+    "comparedLocalities": ["Hinjewadi", "Baner"],
+    "trendSummary": "Search interest is steady with broad end-use and investor demand."
+  },
+  {
+    "city": "Pune",
+    "locality": "Baner",
+    "keyword": "Baner premium apartments",
+    "trendScore": 86,
+    "trendDirection": "rising",
+    "comparedLocalities": ["Wakad", "Balewadi"],
+    "trendSummary": "Premium demand is rising due to social infrastructure and resale liquidity."
+  },
+  {
+    "city": "Bengaluru",
+    "locality": "Whitefield",
+    "keyword": "Whitefield 2 BHK rent",
+    "trendScore": 90,
+    "trendDirection": "rising",
+    "comparedLocalities": ["Sarjapur Road", "Marathahalli"],
+    "trendSummary": "Rental demand remains high near tech parks and metro-linked employment hubs."
+  },
+  {
+    "city": "Bengaluru",
+    "locality": "Sarjapur Road",
+    "keyword": "Sarjapur family rentals",
+    "trendScore": 76,
+    "trendDirection": "stable",
+    "comparedLocalities": ["Whitefield", "Electronic City"],
+    "trendSummary": "Family rental demand is steady, with value depending on school and commute needs."
+  }
+]

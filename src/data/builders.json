@@ -1,0 +1,58 @@
+[
+  {
+    "builderOrOwner": "ABC Developers",
+    "projectName": "Green Heights",
+    "reputationScore": 86,
+    "completionTrackRecord": "Delivered 6 mid-market apartment projects in west Pune with recent handovers within a two-month variance.",
+    "reviewSummary": "Buyers mention responsive maintenance and practical layouts; parking allocation questions appear in older reviews.",
+    "knownRisks": ["Peak-hour access road congestion", "Limited premium amenities"]
+  },
+  {
+    "builderOrOwner": "Parklane Realty",
+    "projectName": "Parklane Homes",
+    "reputationScore": 74,
+    "completionTrackRecord": "Smaller local builder with two delivered phases and resale inventory available.",
+    "reviewSummary": "Residents like the IT park proximity, but society-level upkeep is uneven across towers.",
+    "knownRisks": ["Older construction quality", "Maintenance consistency"]
+  },
+  {
+    "builderOrOwner": "Skyline Infra",
+    "projectName": "Urban Nest",
+    "reputationScore": 81,
+    "completionTrackRecord": "Four completed Pune projects and one active launch with RERA-style milestone tracking in sample data.",
+    "reviewSummary": "Strong floor plans and amenity density; buyers ask for clearer possession milestone updates.",
+    "knownRisks": ["Possession timeline sensitivity", "Launch-phase price escalation"]
+  },
+  {
+    "builderOrOwner": "Starline Homes",
+    "projectName": "Elite Crest",
+    "reputationScore": 88,
+    "completionTrackRecord": "Premium segment builder with timely handovers across Baner and Balewadi sample projects.",
+    "reviewSummary": "Positive sentiment around specifications, clubhouse, and resale demand; entry price is high.",
+    "knownRisks": ["Higher ticket size", "Traffic on arterial roads"]
+  },
+  {
+    "builderOrOwner": "Starline Homes",
+    "projectName": "Elite Crest Phase 2",
+    "reputationScore": 84,
+    "completionTrackRecord": "Extension of an established project, currently tracked as under construction.",
+    "reviewSummary": "Early interest is strong because of the builder brand and Baner demand, with standard launch-stage delivery risk.",
+    "knownRisks": ["Under-construction delivery risk", "GST and floor-rise add-ons"]
+  },
+  {
+    "builderOrOwner": "Prestige Group",
+    "projectName": "Tech Park Residency",
+    "reputationScore": 90,
+    "completionTrackRecord": "Large branded developer with broad Bengaluru delivery history in the sample profile.",
+    "reviewSummary": "Tenants value location and facilities; rent renewals and security deposits are recurring concerns.",
+    "knownRisks": ["High rental demand can lift renewals", "Commute bottlenecks near IT corridors"]
+  },
+  {
+    "builderOrOwner": "Sobha Limited",
+    "projectName": "Sobha Cityscape",
+    "reputationScore": 89,
+    "completionTrackRecord": "Premium Bengaluru developer with strong construction-quality references.",
+    "reviewSummary": "Families like finish quality and open space; commute time to Whitefield varies significantly.",
+    "knownRisks": ["Longer commute for some IT hubs", "Premium maintenance charges"]
+  }
+]
