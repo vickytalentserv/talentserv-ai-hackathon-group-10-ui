@@ -38,26 +38,25 @@ const exampleQueries = [
 ]
 
 function App() {
-  const [user, setUser] = useState<AppUser | null>(null)
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [user, setUser] = useState<AppUser | null>(() => getStoredDemoUser())
+  const [isCheckingAuth, setIsCheckingAuth] = useState(isSupabaseConfigured)
   const [query, setQuery] = useState(exampleQueries[0])
   const [dashboard, setDashboard] = useState<DashboardModel>(() =>
     buildDashboardModel(parseRequirement(exampleQueries[0]), properties, builders, sentiments, trends),
   )
 
   useEffect(() => {
-    const storedDemoUser = getStoredDemoUser()
-    if (storedDemoUser) {
-      setUser(storedDemoUser)
-    }
-
     const supabase = getSupabaseClient()
     if (!supabase) {
-      setIsCheckingAuth(false)
       return undefined
     }
 
+    let isMounted = true
+
     supabase.auth.getSession().then(({ data }) => {
+      if (!isMounted) {
+        return
+      }
       if (data.session?.user) {
         setUser(mapSupabaseUser(data.session.user))
       }
@@ -68,7 +67,10 @@ function App() {
       setUser(session?.user ? mapSupabaseUser(session.user) : getStoredDemoUser())
     })
 
-    return () => listener.subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   const stats = useMemo(
