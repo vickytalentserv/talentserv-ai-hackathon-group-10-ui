@@ -90,7 +90,7 @@ export function normalizePrice(value?: number | string): number {
   if (/lakh|lac|\bl\b/.test(compact)) {
     return Math.round(amount * 100_000)
   }
-  if (/\bk\b|thousand/.test(compact)) {
+  if (/k\b|thousand/.test(compact)) {
     return Math.round(amount * 1_000)
   }
 
