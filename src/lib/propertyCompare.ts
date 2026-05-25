@@ -98,25 +98,183 @@ export function buildBhkChartData(properties: PropertyListing[]): CompareChartPo
   }))
 }
 
-export function buildRadarChartData(properties: PropertyListing[]) {
-  const maxPrice = Math.max(...properties.map((p) => p.price), 1)
-  const maxSqft = Math.max(...properties.map((p) => p.sqft), 1)
+export type ComparisonMetricIcon = 'value' | 'area' | 'rating' | 'bhk' | 'amenities'
 
-  const metrics: { metric: string; score: (property: PropertyListing) => number }[] = [
-    { metric: 'Price value', score: (property) => Math.round((1 - property.price / maxPrice) * 100) },
-    { metric: 'Area', score: (property) => Math.round((property.sqft / maxSqft) * 100) },
-    { metric: 'Rating', score: (property) => Math.round((property.rating / 5) * 100) },
-    { metric: 'BHK', score: (property) => Math.round((property.bedrooms / 5) * 100) },
-    { metric: 'Amenities', score: (property) => Math.round((property.amenities.length / 6) * 100) },
+export interface ComparisonMetricValue {
+  propertyId: string
+  name: string
+  displayValue: string
+  score: number
+  color: string
+  isBest: boolean
+}
+
+export interface ComparisonMetric {
+  id: string
+  label: string
+  description: string
+  icon: ComparisonMetricIcon
+  values: ComparisonMetricValue[]
+}
+
+export interface PropertyOverallScore {
+  propertyId: string
+  name: string
+  color: string
+  score: number
+  rank: number
+}
+
+function markBestValues(values: ComparisonMetricValue[]): ComparisonMetricValue[] {
+  const bestScore = Math.max(...values.map((value) => value.score))
+  if (bestScore <= 0) {
+    return values
+  }
+
+  return values.map((value) => ({
+    ...value,
+    isBest: value.score === bestScore,
+  }))
+}
+
+export function buildOverallComparisonMetrics(properties: PropertyListing[]): ComparisonMetric[] {
+  const maxPrice = Math.max(...properties.map((property) => property.price), 1)
+  const maxSqft = Math.max(...properties.map((property) => property.sqft), 1)
+  const maxBedrooms = Math.max(...properties.map((property) => property.bedrooms), 1)
+  const maxAmenities = Math.max(...properties.map((property) => property.amenities.length), 1)
+
+  const metricDefinitions: {
+    id: string
+    label: string
+    description: string
+    icon: ComparisonMetricIcon
+    score: (property: PropertyListing) => number
+    display: (property: PropertyListing) => string
+  }[] = [
+    {
+      id: 'value',
+      label: 'Value for money',
+      description: 'Lower price within this comparison set scores higher',
+      icon: 'value',
+      score: (property) => Math.round((1 - property.price / maxPrice) * 100),
+      display: formatListingPrice,
+    },
+    {
+      id: 'area',
+      label: 'Living space',
+      description: 'Carpet area relative to the other selected listings',
+      icon: 'area',
+      score: (property) => Math.round((property.sqft / maxSqft) * 100),
+      display: (property) => `${property.sqft.toLocaleString()} sqft`,
+    },
+    {
+      id: 'rating',
+      label: 'User rating',
+      description: 'Average rating out of 5 stars',
+      icon: 'rating',
+      score: (property) => Math.round((property.rating / 5) * 100),
+      display: (property) => `${property.rating.toFixed(1)} / 5`,
+    },
+    {
+      id: 'bhk',
+      label: 'Bedrooms',
+      description: 'Bedroom count compared within this selection',
+      icon: 'bhk',
+      score: (property) => Math.round((property.bedrooms / maxBedrooms) * 100),
+      display: (property) => `${property.bedrooms} BHK`,
+    },
+    {
+      id: 'amenities',
+      label: 'Amenities',
+      description: 'Number of listed amenities and features',
+      icon: 'amenities',
+      score: (property) => Math.round((property.amenities.length / maxAmenities) * 100),
+      display: (property) =>
+        property.amenities.length > 0
+          ? `${property.amenities.length} listed`
+          : 'None listed',
+    },
   ]
 
-  return metrics.map(({ metric, score }) => {
-    const point: Record<string, string | number> = { metric }
-    properties.forEach((property, index) => {
-      point[shortPropertyName(property, index)] = score(property)
-    })
-    return point
+  return metricDefinitions.map((definition) => {
+    const values = properties.map((property, index) => ({
+      propertyId: property.id,
+      name: shortPropertyName(property, index),
+      displayValue: definition.display(property),
+      score: definition.score(property),
+      color: COMPARE_CHART_COLORS[index % COMPARE_CHART_COLORS.length],
+      isBest: false,
+    }))
+
+    return {
+      id: definition.id,
+      label: definition.label,
+      description: definition.description,
+      icon: definition.icon,
+      values: markBestValues(values),
+    }
   })
+}
+
+export function buildOverallComparisonChartData(
+  properties: PropertyListing[],
+): Record<string, string | number>[] {
+  const metrics = buildOverallComparisonMetrics(properties)
+
+  return metrics.map((metric) => {
+    const row: Record<string, string | number> = { metric: metric.label }
+    metric.values.forEach((value) => {
+      row[value.name] = value.score
+    })
+    return row
+  })
+}
+
+export function getOverallComparisonTooltipDetails(
+  properties: PropertyListing[],
+): Map<string, Map<string, string>> {
+  const metrics = buildOverallComparisonMetrics(properties)
+  const details = new Map<string, Map<string, string>>()
+
+  metrics.forEach((metric) => {
+    const metricDetails = new Map<string, string>()
+    metric.values.forEach((value) => {
+      metricDetails.set(value.name, value.displayValue)
+    })
+    details.set(metric.label, metricDetails)
+  })
+
+  return details
+}
+
+export function buildPropertyOverallScores(properties: PropertyListing[]): PropertyOverallScore[] {
+  const metrics = buildOverallComparisonMetrics(properties)
+
+  const scores = properties.map((property, index) => {
+    const average =
+      metrics.reduce((total, metric) => {
+        const value = metric.values.find((entry) => entry.propertyId === property.id)
+        return total + (value?.score ?? 0)
+      }, 0) / metrics.length
+
+    return {
+      propertyId: property.id,
+      name: shortPropertyName(property, index),
+      color: COMPARE_CHART_COLORS[index % COMPARE_CHART_COLORS.length],
+      score: Math.round(average),
+      rank: 0,
+    }
+  })
+
+  const ranked = [...scores].sort((left, right) => right.score - left.score)
+  ranked.forEach((entry, index) => {
+    const match = scores.find((score) => score.propertyId === entry.propertyId)
+    if (match) {
+      match.rank = index + 1
+    }
+  })
+
+  return scores
 }
 
 export function buildMultiCompareRows(properties: PropertyListing[]): CompareAttributeRow[] {

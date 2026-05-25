@@ -59,7 +59,7 @@ export function DashboardPage() {
   const [page, setPage] = useState(1)
   const [searchPage, setSearchPage] = useState(1)
   const pageSize = 6
-  const searchPageSize = 4
+  const searchPageSize = 9
   const propertiesRef = useRef(properties)
   propertiesRef.current = properties
 
@@ -225,7 +225,6 @@ export function DashboardPage() {
               favorites={favorites}
               onToggleFavorite={toggleFavorite}
               loading={loadingMatches}
-              variant="large"
               showCompareAction
               showMatchDetails={matchSource === 'database'}
               onContactProperty={setContactProperty}

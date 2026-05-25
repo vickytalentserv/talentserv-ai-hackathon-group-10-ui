@@ -25,7 +25,7 @@ export function ComparePage() {
             </div>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Compare properties</h1>
             <p className="mt-1 text-muted-foreground">
-              Charts and detailed comparison for price, locality, builder, area, and amenities.
+              Column charts and detailed comparison for price, locality, builder, area, and amenities.
             </p>
           </div>
           {compareCount > 0 && (
