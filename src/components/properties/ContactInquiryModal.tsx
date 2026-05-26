@@ -84,7 +84,7 @@ export function ContactInquiryModal({ property, open, onOpenChange }: ContactInq
 
         {success ? (
           <div className="space-y-4 py-2">
-            <p className="text-sm text-emerald-600 dark:text-emerald-400">
+            <p className="text-sm text-success">
               Your inquiry was submitted successfully. An agent will reach out soon.
             </p>
             <Button onClick={() => handleClose(false)}>Close</Button>
@@ -134,7 +134,7 @@ export function ContactInquiryModal({ property, open, onOpenChange }: ContactInq
                 required
                 value={message}
                 placeholder="I am interested in scheduling a visit…"
-                className="flex w-full rounded-lg border border-input bg-card px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground shadow-sm outline-none placeholder:text-placeholder focus-visible:ring-2 focus-visible:ring-ring"
                 onChange={(event) => setMessage(event.target.value)}
               />
             </div>

@@ -13,24 +13,26 @@ interface PropertyCardProps {
   isFavorite: boolean
   onToggleFavorite: (id: string) => void | Promise<void>
   index?: number
-  size?: 'default' | 'large'
   showMatchDetails?: boolean
   showCompareAction?: boolean
   onContact?: (property: PropertyListing) => void
   onViewDetails?: (property: PropertyListing) => void
 }
 
+function formatPropertyType(type: string) {
+  return type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ')
+}
+
 export function PropertyCard({
   property,
   isFavorite,
   onToggleFavorite,
-  size = 'default',
+  index = 0,
   showMatchDetails = false,
   showCompareAction = false,
   onContact,
   onViewDetails,
 }: PropertyCardProps) {
-  const isLarge = size === 'large'
   const { isInCompare, toggleCompare, canAddToCompare } = useCompareContext()
   const compareSelected = isInCompare(property.id)
   const compareDisabled = !compareSelected && !canAddToCompare
@@ -39,163 +41,135 @@ export function PropertyCard({
       ? `${formatPrice(property.price, property.currency)}/mo`
       : formatPrice(property.price, property.currency)
 
+  const typeLabel = formatPropertyType(property.propertyType)
+
   return (
     <motion.article
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-      whileHover={{ y: -4 }}
+      transition={{ delay: index * 0.03, duration: 0.25 }}
       className="h-full"
     >
       <Card
         className={cn(
-          'group h-full overflow-hidden border-border/80 transition-shadow hover:shadow-xl',
-          isLarge && 'shadow-md',
-          compareSelected && showCompareAction && 'ring-2 ring-primary',
+          'group flex h-full flex-col overflow-hidden border-border/80 transition-shadow hover:shadow-card',
+          compareSelected && showCompareAction && 'ring-2 ring-primary/20',
         )}
       >
-        <div
-          className={cn(
-            'relative overflow-hidden',
-            isLarge ? 'aspect-[4/3] min-h-[240px] sm:min-h-[320px]' : 'aspect-[16/10]',
-          )}
-        >
+        <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-muted">
           <img
             src={property.imageUrl}
             alt={property.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-          <div className={cn('absolute left-3 top-3 flex flex-wrap gap-2', isLarge && 'left-4 top-4 gap-2.5')}>
-            <Badge variant="secondary" className="bg-background/90 backdrop-blur">
-              {property.propertyType}
-            </Badge>
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/5 to-transparent" />
+
+          <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+            <Badge className="border-0 bg-highlight text-highlight-foreground shadow-soft">Featured</Badge>
+            {(property.propertyType === 'villa' || property.price >= 1_50_00_000) && (
+              <Badge variant="warning" className="border-0 shadow-soft">
+                Luxury
+              </Badge>
+            )}
             <StatusBadge status={property.availability} />
           </div>
-          <div className={cn('absolute right-3 top-3 flex gap-2', isLarge && 'right-4 top-4')}>
-            <button
-              type="button"
-              aria-label={isFavorite ? 'Remove from shortlist' : 'Add to shortlist'}
-              className={cn(
-                'flex items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur transition-colors hover:bg-black/50',
-                isLarge ? 'h-11 w-11' : 'h-9 w-9',
-                isFavorite && 'bg-primary text-primary-foreground hover:bg-primary/90',
-              )}
-              onClick={() => void onToggleFavorite(property.id)}
-            >
-              <Heart className={cn('h-4 w-4', isFavorite && 'fill-current', isLarge && 'h-5 w-5')} />
-            </button>
-          </div>
-          <div
+
+          <button
+            type="button"
+            aria-label={isFavorite ? 'Remove from shortlist' : 'Add to shortlist'}
             className={cn(
-              'absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2',
-              isLarge && 'bottom-4 left-4 right-4',
+              'absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full shadow-soft transition-colors',
+              isFavorite
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-white text-muted-foreground hover:text-primary',
             )}
+            onClick={() => void onToggleFavorite(property.id)}
           >
-            <p className={cn('font-bold text-white drop-shadow', isLarge ? 'text-2xl sm:text-3xl' : 'text-lg')}>
-              {priceLabel}
-            </p>
-            <div
-              className={cn(
-                'flex items-center gap-1 rounded-full bg-black/40 px-2 py-1 font-medium text-white backdrop-blur',
-                isLarge ? 'px-3 py-1.5 text-sm' : 'text-xs',
-              )}
-            >
-              <Star className={cn('fill-amber-400 text-amber-400', isLarge ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
+            <Heart className={cn('h-4 w-4', isFavorite && 'fill-current')} />
+          </button>
+
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white">
+            <span className="rounded-md bg-black/30 px-2 py-0.5 text-xs font-medium backdrop-blur-sm">
+              {property.bedrooms} BHK · {typeLabel}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-0.5 text-xs font-semibold text-foreground">
+              <Star className="h-3 w-3 fill-warning text-warning" />
               {property.rating.toFixed(1)}
-            </div>
+            </span>
           </div>
         </div>
 
-        <div className={cn('flex flex-col gap-4', isLarge ? 'gap-5 p-6' : 'p-4')}>
-          <div className="space-y-1.5">
-            <h3
-              className={cn(
-                'line-clamp-2 font-semibold leading-snug',
-                isLarge ? 'text-xl sm:text-2xl' : 'text-base',
-              )}
-            >
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <div className="space-y-1">
+            <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-highlight">
               {property.title}
             </h3>
-            <p
-              className={cn(
-                'flex items-center gap-1.5 text-muted-foreground',
-                isLarge ? 'text-base' : 'text-sm',
-              )}
-            >
-              <MapPin className={cn('shrink-0', isLarge ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
               <span className="line-clamp-1">{property.location}</span>
             </p>
           </div>
 
-          <div
-            className={cn(
-              'flex flex-wrap items-center gap-3 text-muted-foreground',
-              isLarge ? 'gap-4 text-base' : 'text-sm',
-            )}
-          >
+          <p className="text-lg font-bold text-foreground">{priceLabel}</p>
+
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
-              <BedDouble className={cn(isLarge ? 'h-5 w-5' : 'h-4 w-4')} />
+              <Maximize2 className="h-3.5 w-3.5" />
+              {property.sqft.toLocaleString()} sqft
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <BedDouble className="h-3.5 w-3.5" />
               {property.bedrooms} BHK
             </span>
             <span className="inline-flex items-center gap-1">
-              <Bath className={cn(isLarge ? 'h-5 w-5' : 'h-4 w-4')} />
-              {property.bathrooms}
+              <Bath className="h-3.5 w-3.5" />
+              {property.bathrooms} bath
             </span>
-            <span className="inline-flex items-center gap-1">
-              <Maximize2 className={cn(isLarge ? 'h-5 w-5' : 'h-4 w-4')} />
-              {property.sqft.toLocaleString()} sqft
-            </span>
+            <span className="capitalize">{property.furnishing.replace('-', ' ')}</span>
           </div>
 
           <div className="flex flex-wrap gap-1.5">
-            <Badge variant="outline">{property.furnishing}</Badge>
-            {showMatchDetails && property.matchScore != null && (
-              <Badge variant="success">{Math.round(property.matchScore * 100)}% match</Badge>
-            )}
-            {property.amenities.slice(0, 2).map((amenity) => (
-              <Badge key={amenity} variant="outline">
+            {property.amenities.slice(0, 3).map((amenity) => (
+              <span
+                key={amenity}
+                className="rounded-md bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+              >
                 {amenity}
-              </Badge>
+              </span>
             ))}
+            {showMatchDetails && property.matchScore != null && (
+              <Badge variant="accent" className="text-[11px]">
+                {Math.round(property.matchScore * 100)}% match
+              </Badge>
+            )}
           </div>
 
-          {showMatchDetails && property.matchReasons && property.matchReasons.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {property.matchReasons.slice(0, 3).map((reason) => (
-                <Badge key={reason} variant="secondary" className="text-[11px] font-normal">
-                  {reason}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-auto flex flex-col gap-2 pt-1">
+          <div className="mt-auto space-y-2 border-t border-border pt-3">
             {showCompareAction && (
               <Button
-                variant={compareSelected ? 'default' : 'outline'}
-                size={isLarge ? 'default' : 'sm'}
-                className="w-full"
+                variant={compareSelected ? 'highlight' : 'outline'}
+                size="sm"
+                className="h-8 w-full text-xs"
                 disabled={compareDisabled}
                 onClick={() => toggleCompare(property)}
               >
-                <GitCompare className="h-4 w-4" />
-                {compareSelected ? 'Added to compare' : 'Add to compare'}
+                <GitCompare className="h-3.5 w-3.5" />
+                {compareSelected ? 'In compare list' : 'Add to compare'}
               </Button>
             )}
             <div className="flex gap-2">
-              <Button className="flex-1" size={isLarge ? 'default' : 'sm'} onClick={() => onContact?.(property)}>
-                <Phone className="h-4 w-4" />
-                Contact
-              </Button>
               <Button
                 variant="outline"
-                size={isLarge ? 'default' : 'sm'}
-                className="flex-1"
+                size="sm"
+                className="h-9 flex-1 text-xs"
                 onClick={() => onViewDetails?.(property)}
               >
-                View details
+                View Details
+              </Button>
+              <Button variant="default" size="sm" className="h-9 flex-1 text-xs" onClick={() => onContact?.(property)}>
+                <Phone className="h-3.5 w-3.5" />
+                Contact
               </Button>
             </div>
           </div>

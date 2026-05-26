@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils'
 
 const statusConfig: Record<
   AvailabilityStatus,
-  { label: string; variant: 'success' | 'warning' | 'secondary' }
+  { label: string; variant: 'highlight' | 'warning' | 'secondary' }
 > = {
-  available: { label: 'Available', variant: 'success' },
+  available: { label: 'Available', variant: 'highlight' },
   sold: { label: 'Sold', variant: 'warning' },
   rented: { label: 'Rented', variant: 'secondary' },
 }

@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { fetchProperties } from '@/api/client'
-import { usePropertyContext } from '@/context/PropertyContext'
+import { Badge } from '@/components/ui/badge'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { AppShell } from '@/components/layout/AppShell'
 import { ContactInquiryModal } from '@/components/properties/ContactInquiryModal'
 import { CompareSelectionBanner } from '@/components/properties/CompareSelectionBanner'
@@ -14,7 +12,10 @@ import { mapApiPropertyToListing } from '@/lib/propertyMapper'
 import type { PropertyFilters, PropertyListing } from '@/types/property'
 import { Pagination } from '@/components/ui/pagination'
 import { LoadMoreButton } from '@/components/ui/load-more'
-import { Badge } from '@/components/ui/badge'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { fetchProperties } from '@/api/client'
+import { usePropertyContext } from '@/context/PropertyContext'
 
 const defaultFilters: PropertyFilters = {
   search: '',
@@ -155,29 +156,30 @@ export function PropertiesPage() {
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">All properties</h1>
-            <p className="mt-1 text-muted-foreground">
-              {useServer
-                ? `${total} listings from database with server-side filters`
-                : `${total} listings (offline catalog mode)`}
-            </p>
-          </div>
-          {useServer ? (
-            <Badge variant="success">Server pagination</Badge>
-          ) : (
-            <Badge variant="warning">Offline fallback</Badge>
-          )}
-        </div>
+        <PageHeader
+          eyebrow={
+            useServer ? (
+              <Badge variant="success">Live database</Badge>
+            ) : (
+              <Badge variant="warning">Offline catalog</Badge>
+            )
+          }
+          title="All properties"
+          description={
+            useServer
+              ? `${total} listings with server-side filters and pagination`
+              : `${total} listings in offline catalog mode`
+          }
+        />
 
         <PropertyFiltersBar filters={filters} cities={cityOptions} onChange={setFilters} />
 
         <CompareSelectionBanner />
 
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            Showing {listings.length} of {total} results
+        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-3 text-sm shadow-soft">
+          <span className="text-muted-foreground">
+            Showing <span className="font-semibold text-foreground">{listings.length}</span> of{' '}
+            <span className="font-semibold text-foreground">{total}</span> results
           </span>
         </div>
 

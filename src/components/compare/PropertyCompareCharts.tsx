@@ -89,12 +89,12 @@ function SimpleColumnChart({
         <div className="h-[240px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 24, right: 8, left: 0, bottom: 4 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(214 32% 91%)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: 'hsl(215 16% 47%)', fontSize: 11 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 interval={0}
                 angle={-14}
                 textAnchor="end"
@@ -103,13 +103,13 @@ function SimpleColumnChart({
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: 'hsl(215 16% 47%)', fontSize: 11 }}
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                 tickFormatter={valueFormatter}
                 width={56}
               />
               <Tooltip
                 content={<MetricChartTooltip valueFormatter={valueFormatter} />}
-                cursor={{ fill: 'hsl(214 32% 91% / 0.35)' }}
+                cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
               />
               <Bar dataKey="value" radius={[8, 8, 0, 0]} maxBarSize={56}>
                 {data.map((entry) => (
@@ -151,7 +151,7 @@ export function PropertyCompareCharts({ properties }: PropertyCompareChartsProps
         <p className="mb-4 text-sm text-muted-foreground">
           Simple column charts with values shown on top — easy to compare at a glance.
         </p>
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
           <SimpleColumnChart
             title="Price chart"
             description="Listed price for each property"

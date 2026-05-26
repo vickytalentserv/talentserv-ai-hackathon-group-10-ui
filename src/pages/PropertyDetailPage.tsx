@@ -90,10 +90,10 @@ export function PropertyDetailPage() {
 
   return (
     <AppShell profileName={user?.name} profilePicture={user?.picture}>
-      <div className="space-y-6">
-        <Button variant="ghost" className="gap-2 px-0" onClick={() => navigate(-1)}>
+      <div className="space-y-8">
+        <Button variant="ghost" className="-ml-2 gap-2 px-2" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
-          Back
+          Back to listings
         </Button>
 
         {loading && (
@@ -113,12 +113,12 @@ export function PropertyDetailPage() {
 
         {property && !loading && (
           <>
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="overflow-hidden rounded-2xl border border-border">
+            <div className="grid gap-8 lg:grid-cols-5">
+              <div className="overflow-hidden rounded-2xl border border-border shadow-card lg:col-span-3">
                 <img src={property.imageUrl} alt={property.title} className="aspect-[16/10] w-full object-cover" />
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-6 lg:col-span-2">
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">{property.propertyType}</Badge>
                   <StatusBadge status={property.availability} />
@@ -139,23 +139,26 @@ export function PropertyDetailPage() {
                 <div className="flex items-end justify-between gap-4">
                   <p className="text-3xl font-bold text-primary">{priceLabel}</p>
                   <div className="flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm font-medium">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <Star className="h-4 w-4 fill-primary text-primary" />
                     {property.rating.toFixed(1)}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  <Card className="p-3 text-center">
+                  <Card className="border-border/80 bg-muted/30 p-4 text-center">
                     <BedDouble className="mx-auto h-5 w-5 text-primary" />
-                    <p className="mt-2 text-sm font-semibold">{property.bedrooms} BHK</p>
+                    <p className="mt-2 text-lg font-semibold">{property.bedrooms}</p>
+                    <p className="text-xs text-muted-foreground">BHK</p>
                   </Card>
-                  <Card className="p-3 text-center">
+                  <Card className="border-border/80 bg-muted/30 p-4 text-center">
                     <Bath className="mx-auto h-5 w-5 text-primary" />
-                    <p className="mt-2 text-sm font-semibold">{property.bathrooms} baths</p>
+                    <p className="mt-2 text-lg font-semibold">{property.bathrooms}</p>
+                    <p className="text-xs text-muted-foreground">Baths</p>
                   </Card>
-                  <Card className="p-3 text-center">
+                  <Card className="border-border/80 bg-muted/30 p-4 text-center">
                     <Maximize2 className="mx-auto h-5 w-5 text-primary" />
-                    <p className="mt-2 text-sm font-semibold">{property.sqft.toLocaleString()} sqft</p>
+                    <p className="mt-2 text-lg font-semibold">{property.sqft.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Sq ft</p>
                   </Card>
                 </div>
 
@@ -201,7 +204,7 @@ export function PropertyDetailPage() {
               </div>
             </div>
 
-            <Card className="p-6">
+            <Card className="p-6 sm:p-8">
               <h2 className="text-lg font-semibold">About this property</h2>
               <p className="mt-3 leading-relaxed text-muted-foreground">
                 {property.description ??
@@ -215,7 +218,7 @@ export function PropertyDetailPage() {
             </Card>
 
             {property.matchReasons && property.matchReasons.length > 0 && (
-              <Card className="p-6">
+              <Card className="p-6 sm:p-8">
                 <h2 className="text-lg font-semibold">Why this matched your search</h2>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {property.matchReasons.map((reason) => (

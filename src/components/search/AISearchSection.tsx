@@ -1,13 +1,10 @@
 import { useAuth0 } from '@auth0/auth0-react'
-import { motion } from 'framer-motion'
-import { Loader2, Search, Sparkles } from 'lucide-react'
+import { ArrowRight, Loader2, Sparkles, Wand2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { parseRequirement, saveRequirement, type ParsedRequirement } from '@/api/client'
 import { auth0Audience } from '@/config'
 import { EXAMPLE_PROMPTS } from '@/data/mockProperties'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ParsedFiltersPanel } from '@/components/requirements/ParsedFiltersPanel'
+import { cn } from '@/lib/utils'
 
 interface AISearchSectionProps {
   initialText?: string
@@ -17,16 +14,12 @@ interface AISearchSectionProps {
 export function AISearchSection({ initialText = '', onSearch }: AISearchSectionProps) {
   const { getAccessTokenSilently } = useAuth0()
   const [text, setText] = useState(initialText)
-  const [parsed, setParsed] = useState<ParsedRequirement | null>(null)
   const [loading, setLoading] = useState(false)
-  const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [focused, setFocused] = useState(false)
 
   useEffect(() => {
-    if (initialText) {
-      setText(initialText)
-    }
+    if (initialText) setText(initialText)
   }, [initialText])
 
   async function handleSearch() {
@@ -37,24 +30,17 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
 
     setLoading(true)
     setError(null)
-    setSaved(false)
 
     try {
       const result = await parseRequirement(text.trim())
-      setParsed(result)
       onSearch(result)
-
       try {
-        const token = await getAccessTokenSilently({
-          authorizationParams: { audience: auth0Audience },
-        })
+        const token = await getAccessTokenSilently({ authorizationParams: { audience: auth0Audience } })
         await saveRequirement(token, text.trim(), result)
-        setSaved(true)
       } catch {
-        // Search still works without save when auth token fails
+        /* optional save */
       }
     } catch (err) {
-      setParsed(null)
       setError(err instanceof Error ? err.message : 'Failed to parse your search')
     } finally {
       setLoading(false)
@@ -62,79 +48,78 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
   }
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-accent/30 p-6 shadow-lg sm:p-8">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-primary/5 blur-3xl" />
+    <div className="relative overflow-hidden rounded-2xl border border-highlight/15 bg-card shadow-card">
+      <div className="search-card-gradient px-5 py-6 sm:px-8 sm:py-7">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-highlight/8 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-primary/8 blur-3xl" />
 
-      <div className="relative space-y-6">
-        <div className="space-y-2">
-          <Badge variant="secondary" className="gap-1">
-            <Sparkles className="h-3 w-3" />
-            AI Property Search
-          </Badge>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Find your perfect property with natural language
-          </h1>
-          <p className="max-w-2xl text-muted-foreground">
-            Describe budget, BHK, location, furnishing, and intent — we parse it into smart filters
-            instantly.
-          </p>
+        <div className="relative flex items-start gap-3.5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highlight to-[#003865] text-white shadow-soft">
+            <Wand2 className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+                AI Property Search
+              </h2>
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Describe your dream home in natural language.
+            </p>
+          </div>
         </div>
 
-        <motion.div
-          animate={{ scale: focused ? 1.01 : 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="relative"
+        <div
+          className={cn(
+            'relative mt-5 flex h-14 w-full items-center overflow-hidden rounded-full border bg-card pl-5 pr-1.5 shadow-soft transition-all sm:h-[4.25rem]',
+            focused
+              ? 'border-highlight ring-4 ring-highlight/12'
+              : 'border-highlight/25 hover:border-highlight/40',
+          )}
         >
-          <div
-            className={`flex flex-col gap-3 rounded-2xl border bg-card/90 p-3 shadow-md backdrop-blur transition-colors sm:flex-row sm:items-center ${
-              focused ? 'border-primary/50 ring-2 ring-primary/20' : 'border-border'
-            }`}
+          <Wand2 className="mr-3 hidden h-5 w-5 shrink-0 text-highlight/70 sm:block" />
+          <input
+            type="text"
+            value={text}
+            placeholder="I want a 2BHK property in Baner area"
+            className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-placeholder sm:text-lg"
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                void handleSearch()
+              }
+            }}
+          />
+          <button
+            type="button"
+            disabled={loading}
+            className="btn-gradient-primary inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 sm:h-12 sm:px-8 sm:text-base"
+            onClick={() => void handleSearch()}
           >
-            <div className="flex flex-1 items-start gap-3 px-2 py-1">
-              <Search className="mt-2.5 h-5 w-5 shrink-0 text-primary" />
-              <textarea
-                rows={2}
-                value={text}
-                placeholder='Try "I want a 2BHK property in Baner area" or "Show luxury apartments under 1 crore"'
-                className="min-h-[56px] w-full resize-none bg-transparent text-base outline-none placeholder:text-muted-foreground"
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                onChange={(event) => setText(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault()
-                    void handleSearch()
-                  }
-                }}
-              />
-            </div>
-            <Button size="lg" disabled={loading} className="shrink-0 sm:px-8" onClick={() => void handleSearch()}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Searching…
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Search
-                </>
-              )}
-            </Button>
-          </div>
-        </motion.div>
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                Search
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </div>
 
-        <div className="flex flex-wrap gap-2">
-          {EXAMPLE_PROMPTS.slice(0, 4).map((prompt) => (
+        <div className="relative mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Try:</span>
+          {EXAMPLE_PROMPTS.slice(0, 3).map((prompt) => (
             <button
               key={prompt}
               type="button"
-              className="rounded-full border border-border bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-accent hover:text-accent-foreground"
+              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-highlight/40 hover:text-highlight sm:text-sm"
               onClick={() => {
                 setText(prompt)
-                setParsed(null)
-                setSaved(false)
                 setError(null)
               }}
             >
@@ -143,9 +128,12 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
           ))}
         </div>
 
-        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
-        {parsed && <ParsedFiltersPanel parsed={parsed} saved={saved} />}
+        {error && (
+          <p className="relative mt-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {error}
+          </p>
+        )}
       </div>
-    </section>
+    </div>
   )
 }

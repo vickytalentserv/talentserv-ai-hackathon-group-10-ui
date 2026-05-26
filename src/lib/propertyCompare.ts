@@ -12,10 +12,10 @@ const SOURCE_LABELS: Record<string, string> = {
 }
 
 export const COMPARE_CHART_COLORS = [
-  'hsl(173 80% 32%)',
-  'hsl(221 83% 53%)',
-  'hsl(32 95% 44%)',
-  'hsl(280 65% 50%)',
+  'hsl(var(--chart-1))',
+  'hsl(var(--chart-2))',
+  'hsl(var(--chart-3))',
+  'hsl(var(--chart-4))',
 ]
 
 export interface CompareChartPoint {

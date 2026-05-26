@@ -2,16 +2,17 @@ import { motion } from 'framer-motion'
 import { Building2, MapPin, TrendingUp, Users } from 'lucide-react'
 import type { DashboardStats } from '@/types/property'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 interface StatsWidgetsProps {
   stats: DashboardStats
 }
 
 const statCards = [
-  { key: 'totalListed', label: 'Total listed', icon: Building2 },
-  { key: 'soldOrRented', label: 'Sold / rented', icon: Users },
-  { key: 'trendingLocation', label: 'Trending location', icon: MapPin },
-  { key: 'categoriesCount', label: 'Property categories', icon: TrendingUp },
+  { key: 'totalListed', label: 'Total listed', icon: Building2, tile: 'icon-tile-blue' },
+  { key: 'soldOrRented', label: 'Sold / rented', icon: Users, tile: 'icon-tile-violet' },
+  { key: 'trendingLocation', label: 'Trending area', icon: MapPin, tile: 'icon-tile-sky' },
+  { key: 'categoriesCount', label: 'Categories', icon: TrendingUp, tile: 'icon-tile-blue' },
 ] as const
 
 export function StatsWidgets({ stats }: StatsWidgetsProps) {
@@ -29,21 +30,19 @@ export function StatsWidgets({ stats }: StatsWidgetsProps) {
         return (
           <motion.div
             key={card.key}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.08 }}
+            transition={{ delay: index * 0.05 }}
           >
-            <Card className="overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {card.label}
-                </CardTitle>
-                <div className="rounded-lg bg-accent p-2 text-accent-foreground">
-                  <Icon className="h-4 w-4" />
+            <Card>
+              <CardContent className="flex items-center gap-4 p-5">
+                <div className={cn('h-11 w-11 shrink-0', card.tile)}>
+                  <Icon className="h-5 w-5" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold tracking-tight">{values[card.key]}</p>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">{card.label}</p>
+                  <p className="text-2xl font-semibold tracking-tight">{values[card.key]}</p>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
@@ -54,24 +53,26 @@ export function StatsWidgets({ stats }: StatsWidgetsProps) {
 }
 
 export function CategoryBreakdown({ stats }: StatsWidgetsProps) {
+  const barColors = ['bg-primary', 'bg-foreground', 'bg-chart-3', 'bg-chart-4']
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Property categories</CardTitle>
+        <CardTitle>Property categories</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {stats.categories.map((category) => (
-          <div key={category.label} className="space-y-1">
-            <div className="flex items-center justify-between text-sm">
-              <span className="capitalize">{category.label}</span>
-              <span className="font-medium">{category.count}</span>
+      <CardContent className="space-y-4">
+        {stats.categories.map((category, i) => (
+          <div key={category.label} className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="font-medium capitalize">{category.label}</span>
+              <span className="font-semibold text-foreground">{category.count}</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all"
-                style={{
-                  width: `${Math.max(8, (category.count / stats.totalListed) * 100)}%`,
-                }}
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.max(8, (category.count / stats.totalListed) * 100)}%` }}
+                transition={{ duration: 0.5 }}
+                className={cn('h-full rounded-full', barColors[i % barColors.length])}
               />
             </div>
           </div>
@@ -82,20 +83,20 @@ export function CategoryBreakdown({ stats }: StatsWidgetsProps) {
 }
 
 export function RecentActivityPanel({ properties }: { properties: { title: string; city: string }[] }) {
-  const recent = properties.slice(0, 5)
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent activity</CardTitle>
+        <CardTitle>Recent activity</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {recent.map((item, index) => (
-          <div key={`${item.title}-${index}`} className="flex items-start gap-3">
-            <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
+      <CardContent className="space-y-1">
+        {properties.slice(0, 5).map((item, index) => (
+          <div key={`${item.title}-${index}`} className="flex gap-3 rounded-lg p-2.5 hover:bg-muted/50">
+            <div className="icon-tile-blue mt-0.5 h-7 w-7 shrink-0">
+              <MapPin className="h-3.5 w-3.5" />
+            </div>
             <div>
               <p className="text-sm font-medium leading-snug">{item.title}</p>
-              <p className="text-xs text-muted-foreground">{item.city} · Listed recently</p>
+              <p className="text-xs text-muted-foreground">{item.city}</p>
             </div>
           </div>
         ))}

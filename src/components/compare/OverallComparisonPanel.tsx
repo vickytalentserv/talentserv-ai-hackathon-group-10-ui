@@ -134,12 +134,12 @@ export function OverallComparisonPanel({ properties }: OverallComparisonPanelPro
                 barCategoryGap="18%"
                 barGap={6}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(214 32% 91%)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                 <XAxis
                   dataKey="metric"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'hsl(215 16% 47%)', fontSize: 11 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   interval={0}
                   angle={-18}
                   textAnchor="end"
@@ -150,12 +150,12 @@ export function OverallComparisonPanel({ properties }: OverallComparisonPanelPro
                   tickCount={6}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'hsl(215 16% 47%)', fontSize: 11 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
                   label={{
                     value: 'Score',
                     angle: -90,
                     position: 'insideLeft',
-                    fill: 'hsl(215 16% 47%)',
+                    fill: 'hsl(var(--muted-foreground))',
                     fontSize: 11,
                   }}
                 />
@@ -192,7 +192,7 @@ export function OverallComparisonPanel({ properties }: OverallComparisonPanelPro
               <div key={metric.id} className="rounded-lg border border-border bg-card/60 p-3">
                 <p className="text-xs font-medium text-muted-foreground">{metric.label}</p>
                 <p className="mt-1 text-sm font-semibold">{winner?.displayValue ?? '—'}</p>
-                <p className="mt-0.5 text-xs text-emerald-700 dark:text-emerald-400">
+                <p className="mt-0.5 text-xs text-success">
                   Best: {winner?.name ?? '—'}
                 </p>
               </div>

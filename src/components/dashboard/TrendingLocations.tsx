@@ -25,10 +25,10 @@ export function TrendingLocations({ locations }: TrendingLocationsProps) {
           {locations.map((location, index) => (
             <div
               key={location.name}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-background/60 px-3 py-2.5"
+              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-3 py-2.5"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+                <div className="icon-tile-blue h-9 w-9 shrink-0">
                   <MapPin className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
@@ -38,7 +38,7 @@ export function TrendingLocations({ locations }: TrendingLocationsProps) {
               </div>
               <Badge
                 variant="success"
-                className={cn('shrink-0 gap-1', index === 0 && 'ring-1 ring-emerald-200 dark:ring-emerald-900')}
+                className={cn('shrink-0 gap-1', index === 0 && 'ring-1 ring-primary/30')}
               >
                 <TrendingUp className="h-3 w-3" />
                 +{location.growth}%

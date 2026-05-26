@@ -11,6 +11,7 @@ import {
 } from '@/api/client'
 import { getUploadTemplateFallback } from '@/data/uploadTemplates'
 import { AppShell } from '@/components/layout/AppShell'
+import { PageHeader } from '@/components/layout/PageHeader'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -26,6 +27,9 @@ const SCRAPE_SOURCES = [
 ] as const
 
 const SCRAPE_CITIES = ['Pune', 'Mumbai', 'Bengaluru'] as const
+
+const fieldSelectClass =
+  'flex h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground shadow-soft outline-none transition-all focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-ring/30'
 
 export function DataUploadPage() {
   const { getAccessTokenSilently } = useAuth0()
@@ -145,16 +149,14 @@ export function DataUploadPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Upload property data</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Import listings from a CSV or Excel file into the database. Existing rows with the same
-            source and external ID are updated.
-          </p>
-        </div>
+      <div className="space-y-8">
+        <PageHeader
+          eyebrow="Admin tools"
+          title="Upload property data"
+          description="Import listings from CSV or Excel, or fetch live data from supported portals."
+        />
 
-        <Card className="p-6">
+        <Card className="p-6 sm:p-8">
           <form className="space-y-5" onSubmit={(event) => void handleSubmit(event)}>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="dataset-type">
@@ -162,7 +164,7 @@ export function DataUploadPage() {
               </label>
               <select
                 id="dataset-type"
-                className="flex h-11 w-full rounded-lg border border-input bg-card px-3 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={fieldSelectClass}
                 value={datasetType}
                 onChange={(event) => {
                   setDatasetType(event.target.value as typeof datasetType)
@@ -198,7 +200,7 @@ export function DataUploadPage() {
             </div>
 
             {error && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+              <div className="flex items-start gap-2 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -220,7 +222,7 @@ export function DataUploadPage() {
           </form>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 sm:p-8">
           <div className="mb-4 flex items-center gap-2">
             <Globe className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Fetch live listings (scraping)</h2>
@@ -237,7 +239,7 @@ export function DataUploadPage() {
               </label>
               <select
                 id="scrape-city"
-                className="flex h-11 w-full rounded-lg border border-input bg-card px-3 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={fieldSelectClass}
                 value={scrapeCity}
                 onChange={(event) => setScrapeCity(event.target.value as typeof scrapeCity)}
               >
@@ -254,7 +256,7 @@ export function DataUploadPage() {
               </label>
               <select
                 id="scrape-intent"
-                className="flex h-11 w-full rounded-lg border border-input bg-card px-3 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className={fieldSelectClass}
                 value={scrapeIntent}
                 onChange={(event) => setScrapeIntent(event.target.value as typeof scrapeIntent)}
               >
@@ -271,10 +273,10 @@ export function DataUploadPage() {
                 <button
                   key={source.id}
                   type="button"
-                  className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                  className={`rounded-xl border px-3 py-1.5 text-sm transition-colors ${
                     scrapeSources.includes(source.id)
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-card text-muted-foreground hover:bg-muted'
+                      ? 'border-primary bg-primary text-primary-foreground shadow-soft'
+                      : 'border-border bg-card text-muted-foreground hover:bg-muted/80'
                   }`}
                   onClick={() => toggleScrapeSource(source.id)}
                 >
@@ -317,7 +319,7 @@ export function DataUploadPage() {
           )}
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 sm:p-8">
           <div className="mb-4 flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Expected columns</h2>
@@ -347,9 +349,9 @@ export function DataUploadPage() {
         </Card>
 
         {result && (
-          <Card className="p-6">
+          <Card className="p-6 sm:p-8">
             <div className="mb-4 flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
               <h2 className="text-lg font-semibold">Upload result</h2>
             </div>
 
@@ -368,21 +370,21 @@ export function DataUploadPage() {
               </div>
               <div>
                 <dt className="text-muted-foreground">Inserted</dt>
-                <dd className="font-medium text-emerald-600">{result.rows_inserted}</dd>
+                <dd className="font-medium text-success">{result.rows_inserted}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Updated</dt>
-                <dd className="font-medium text-blue-600">{result.rows_updated}</dd>
+                <dd className="font-medium text-primary">{result.rows_updated}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Skipped</dt>
-                <dd className="font-medium text-amber-600">{result.rows_skipped}</dd>
+                <dd className="font-medium text-muted-foreground">{result.rows_skipped}</dd>
               </div>
             </dl>
 
             {result.errors.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                <p className="text-sm font-medium text-accent-foreground">
                   Validation issues ({result.errors.length})
                 </p>
                 <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">

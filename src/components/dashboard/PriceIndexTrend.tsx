@@ -37,12 +37,12 @@ function CustomTooltip({
       <p className="mb-1 font-semibold">{label}</p>
       {secondary && (
         <p className="text-muted-foreground">
-          secondary : <span className="font-medium text-foreground">{secondary.value}</span>
+          Market avg : <span className="font-medium text-foreground">{secondary.value}</span>
         </p>
       )}
       {primary && (
         <p className="text-muted-foreground">
-          value : <span className="font-medium text-primary">{primary.value}</span>
+          Index : <span className="font-medium text-primary">{primary.value}</span>
         </p>
       )}
     </div>
@@ -63,37 +63,37 @@ export function PriceIndexTrend({ data }: PriceIndexTrendProps) {
               <ComposedChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
                 <defs>
                   <linearGradient id="priceIndexFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(173 80% 32%)" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="hsl(173 80% 32%)" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(214 32% 91%)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                 <XAxis
                   dataKey="month"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'hsl(215 16% 47%)', fontSize: 12 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fill: 'hsl(215 16% 47%)', fontSize: 12 }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                   domain={[0, 'auto']}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(173 80% 32%)', strokeWidth: 1 }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }} />
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="hsl(173 80% 32%)"
+                  stroke="hsl(var(--primary))"
                   strokeWidth={2.5}
                   fill="url(#priceIndexFill)"
-                  dot={{ r: 3, fill: 'hsl(173 80% 32%)', strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: 'hsl(173 80% 32%)', stroke: '#fff', strokeWidth: 2 }}
+                  dot={{ r: 3, fill: 'hsl(var(--primary))', strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: 'hsl(var(--primary))', stroke: '#fff', strokeWidth: 2 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="secondary"
-                  stroke="hsl(173 60% 45%)"
+                  stroke="hsl(var(--chart-2))"
                   strokeWidth={2}
                   strokeDasharray="6 4"
                   dot={false}

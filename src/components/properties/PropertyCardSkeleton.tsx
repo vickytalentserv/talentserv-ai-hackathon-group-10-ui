@@ -1,31 +1,28 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card } from '@/components/ui/card'
 
-interface PropertyCardSkeletonProps {
-  size?: 'default' | 'large'
-}
-
-export function PropertyCardSkeleton({ size = 'default' }: PropertyCardSkeletonProps) {
-  const isLarge = size === 'large'
-
+export function PropertyCardSkeleton() {
   return (
-    <Card className="overflow-hidden">
-      <Skeleton
-        className={
-          isLarge
-            ? 'aspect-[4/3] min-h-[240px] w-full rounded-none sm:min-h-[320px]'
-            : 'aspect-[16/10] w-full rounded-none'
-        }
-      />
-      <div className={isLarge ? 'space-y-4 p-6' : 'space-y-3 p-4'}>
-        <Skeleton className={isLarge ? 'h-7 w-4/5' : 'h-5 w-4/5'} />
-        <Skeleton className={isLarge ? 'h-5 w-3/5' : 'h-4 w-3/5'} />
+    <Card className="flex h-full flex-col overflow-hidden border-border/80">
+      <Skeleton className="aspect-[4/3] w-full shrink-0 rounded-none" />
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <Skeleton className="h-4 w-4/5" />
+        <Skeleton className="h-3 w-3/5" />
+        <Skeleton className="h-6 w-2/5" />
         <div className="flex gap-2">
-          <Skeleton className={isLarge ? 'h-5 w-20' : 'h-4 w-16'} />
-          <Skeleton className={isLarge ? 'h-5 w-20' : 'h-4 w-16'} />
-          <Skeleton className={isLarge ? 'h-5 w-24' : 'h-4 w-20'} />
+          <Skeleton className="h-3 w-14" />
+          <Skeleton className="h-3 w-14" />
+          <Skeleton className="h-3 w-16" />
         </div>
-        <Skeleton className={isLarge ? 'h-11 w-full' : 'h-9 w-full'} />
+        <div className="flex gap-1.5">
+          <Skeleton className="h-5 w-12 rounded-md" />
+          <Skeleton className="h-5 w-12 rounded-md" />
+          <Skeleton className="h-5 w-14 rounded-md" />
+        </div>
+        <div className="mt-auto flex gap-2 border-t border-border pt-3">
+          <Skeleton className="h-9 flex-1 rounded-xl" />
+          <Skeleton className="h-9 flex-1 rounded-xl" />
+        </div>
       </div>
     </Card>
   )
