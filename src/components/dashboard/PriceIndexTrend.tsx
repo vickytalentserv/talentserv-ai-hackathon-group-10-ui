@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface PriceIndexTrendProps {
   data: PriceIndexPoint[]
+  description?: string
 }
 
 function CustomTooltip({
@@ -49,13 +50,16 @@ function CustomTooltip({
   )
 }
 
-export function PriceIndexTrend({ data }: PriceIndexTrendProps) {
+export function PriceIndexTrend({
+  data,
+  description = 'Average price per sq.ft across tracked localities',
+}: PriceIndexTrendProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <Card className="overflow-hidden">
         <CardHeader className="pb-2">
           <CardTitle className="text-base font-semibold">Price Index Trend</CardTitle>
-          <CardDescription>Average price per sq.ft across tracked localities</CardDescription>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[280px] w-full">

@@ -6,16 +6,17 @@ import { cn } from '@/lib/utils'
 
 interface StatsWidgetsProps {
   stats: DashboardStats
+  searchContext?: boolean
 }
 
 const statCards = [
-  { key: 'totalListed', label: 'Total listed', icon: Building2, tile: 'icon-tile-blue' },
-  { key: 'soldOrRented', label: 'Sold / rented', icon: Users, tile: 'icon-tile-violet' },
-  { key: 'trendingLocation', label: 'Trending area', icon: MapPin, tile: 'icon-tile-sky' },
-  { key: 'categoriesCount', label: 'Categories', icon: TrendingUp, tile: 'icon-tile-blue' },
+  { key: 'totalListed', label: 'Total listed', searchLabel: 'Matching listings', icon: Building2, tile: 'icon-tile-orange' },
+  { key: 'soldOrRented', label: 'Sold / rented', searchLabel: 'Sold / rented', icon: Users, tile: 'icon-tile-teal' },
+  { key: 'trendingLocation', label: 'Trending area', searchLabel: 'Top search city', icon: MapPin, tile: 'icon-tile-blue' },
+  { key: 'categoriesCount', label: 'Categories', searchLabel: 'Categories', icon: TrendingUp, tile: 'icon-tile-violet' },
 ] as const
 
-export function StatsWidgets({ stats }: StatsWidgetsProps) {
+export function StatsWidgets({ stats, searchContext = false }: StatsWidgetsProps) {
   const values: Record<(typeof statCards)[number]['key'], string | number> = {
     totalListed: stats.totalListed,
     soldOrRented: stats.soldOrRented,
@@ -34,13 +35,15 @@ export function StatsWidgets({ stats }: StatsWidgetsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
           >
-            <Card>
+            <Card className="transition-shadow hover:shadow-card">
               <CardContent className="flex items-center gap-4 p-5">
                 <div className={cn('h-11 w-11 shrink-0', card.tile)}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground">{card.label}</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {searchContext ? card.searchLabel : card.label}
+                  </p>
                   <p className="text-2xl font-semibold tracking-tight">{values[card.key]}</p>
                 </div>
               </CardContent>

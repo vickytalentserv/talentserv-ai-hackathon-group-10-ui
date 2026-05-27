@@ -27,7 +27,7 @@ export function PageHeader({
       )}
     >
       <div className="max-w-2xl space-y-2">
-        {eyebrow && <div className="text-sm font-medium text-highlight">{eyebrow}</div>}
+        {eyebrow && <div className="eyebrow-pill">{eyebrow}</div>}
         <h1
           className={cn(
             'font-semibold tracking-tight text-foreground',

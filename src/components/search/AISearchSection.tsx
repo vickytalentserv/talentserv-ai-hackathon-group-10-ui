@@ -48,37 +48,37 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-highlight/15 bg-card shadow-card">
-      <div className="search-card-gradient px-5 py-6 sm:px-8 sm:py-7">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-highlight/8 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-primary/8 blur-3xl" />
+    <div className="relative overflow-hidden rounded-2xl border border-highlight/20 shadow-elevated">
+      <div className="search-card-gradient px-5 py-6 sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-[hsl(168_55%_38%/0.15)] blur-3xl" />
 
         <div className="relative flex items-start gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-highlight to-[#003865] text-white shadow-soft">
+          <div className="brand-gradient flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white shadow-soft">
             <Wand2 className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+              <h2 className="text-lg font-semibold tracking-tight text-white sm:text-xl">
                 AI Property Search
               </h2>
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Describe your dream home in natural language.
+            <p className="mt-0.5 text-sm text-white/70">
+              Describe your dream home in natural language — we&apos;ll find the best matches.
             </p>
           </div>
         </div>
 
         <div
           className={cn(
-            'relative mt-5 flex h-14 w-full items-center overflow-hidden rounded-full border bg-card pl-5 pr-1.5 shadow-soft transition-all sm:h-[4.25rem]',
+            'search-card-inner relative mt-5 flex h-14 w-full items-center overflow-hidden rounded-full border pl-5 pr-1.5 shadow-elevated transition-all sm:h-[4.25rem]',
             focused
-              ? 'border-highlight ring-4 ring-highlight/12'
-              : 'border-highlight/25 hover:border-highlight/40',
+              ? 'border-primary ring-4 ring-primary/20'
+              : 'border-white/20 hover:border-primary/40',
           )}
         >
-          <Wand2 className="mr-3 hidden h-5 w-5 shrink-0 text-highlight/70 sm:block" />
+          <Wand2 className="mr-3 hidden h-5 w-5 shrink-0 text-highlight sm:block" />
           <input
             type="text"
             value={text}
@@ -112,12 +112,12 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
         </div>
 
         <div className="relative mt-4 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Try:</span>
+          <span className="text-xs font-medium text-white/60">Try:</span>
           {EXAMPLE_PROMPTS.slice(0, 3).map((prompt) => (
             <button
               key={prompt}
               type="button"
-              className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-highlight/40 hover:text-highlight sm:text-sm"
+              className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-white/85 backdrop-blur-sm transition-colors hover:border-primary/50 hover:bg-primary/20 hover:text-white sm:text-sm"
               onClick={() => {
                 setText(prompt)
                 setError(null)
@@ -129,7 +129,7 @@ export function AISearchSection({ initialText = '', onSearch }: AISearchSectionP
         </div>
 
         {error && (
-          <p className="relative mt-4 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <p className="relative mt-4 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-red-100">
             {error}
           </p>
         )}

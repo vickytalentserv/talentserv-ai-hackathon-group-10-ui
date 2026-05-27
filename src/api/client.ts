@@ -180,7 +180,8 @@ export interface PropertyMatchResponse {
   items: MatchedPropertyItem[]
   parsed: ParsedRequirement
   total: number
-  source: 'database'
+  source: 'database' | 'database+llm' | 'database+relaxed'
+  relaxed?: boolean
 }
 
 export async function matchProperties(payload: {

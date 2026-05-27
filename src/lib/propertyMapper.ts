@@ -1,5 +1,6 @@
 import type { ApiProperty } from '@/api/client'
 import { MOCK_PROPERTIES } from '@/data/mockProperties'
+import { extractLocalityFromAddress, findKnownLocalityInText } from '@/lib/locality'
 import { toListingKey } from '@/lib/listingKeys'
 import type { PropertyListing } from '@/types/property'
 
@@ -9,22 +10,28 @@ function pickImage(id: number): string {
   return imagePool[id % imagePool.length] ?? imagePool[0]
 }
 
-function extractLocality(address: string): string | null {
-  const parts = address.split(',').map((part) => part.trim())
-  if (parts.length >= 2) {
-    return parts[parts.length - 1]
+function normalizeListingTitle(title: string): string {
+  const cleaned = title.trim().replace(/\s+/g, ' ')
+  const match = cleaned.match(/\d+\s*BHK[^.₹]{0,120}(?:in|at|on)\s+[^.₹]{3,80}/i)
+  if (match) {
+    return match[0].trim()
   }
-  return null
+  if (cleaned.length > 120) {
+    return cleaned.slice(0, 120).replace(/\s+\S*$/, '')
+  }
+  return cleaned
 }
 
 export function mapApiPropertyToListing(property: ApiProperty, index = 0): PropertyListing {
   const furnishingOptions = ['furnished', 'semi-furnished', 'unfurnished'] as const
   const { listingKey } = toListingKey(`api-${property.id}`)
-  const locality = extractLocality(property.address)
+  const locality =
+    extractLocalityFromAddress(property.address, property.city) ??
+    findKnownLocalityInText(property.title, property.city)
 
   return {
     id: `api-${property.id}`,
-    title: property.title,
+    title: normalizeListingTitle(property.title),
     location: locality ? `${locality}, ${property.city}` : `${property.address}, ${property.city}`,
     city: property.city,
     locality,
