@@ -1,7 +1,7 @@
 import { ArrowLeftRight } from 'lucide-react'
 import type { PropertyListing } from '@/types/property'
 import { buildMultiCompareRows, shortPropertyName, summarizeMultiCompare } from '@/lib/propertyCompare'
-import { formatPrice } from '@/lib/utils'
+import { formatListingPrice } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -63,9 +63,7 @@ export function PropertyCompareTable({ properties }: PropertyCompareTableProps) 
                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{property.title}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{property.location}</p>
                 <p className="mt-2 text-lg font-bold text-primary">
-                  {property.listingStatus === 'rent'
-                    ? `${formatPrice(property.price, property.currency)}/mo`
-                    : formatPrice(property.price, property.currency)}
+                  {formatListingPrice(property.price, property.listingStatus, property.currency)}
                 </p>
               </div>
             ))}

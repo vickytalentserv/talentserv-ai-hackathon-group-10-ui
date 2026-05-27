@@ -19,7 +19,7 @@ export function BrandLogo({ size = 'md', showText = true, className }: BrandLogo
     <div className={cn('flex items-center gap-2.5', className)}>
       <span
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground shadow-soft',
+          'flex shrink-0 items-center justify-center rounded-xl brand-gradient font-bold text-primary-foreground shadow-soft',
           s.tile,
         )}
       >

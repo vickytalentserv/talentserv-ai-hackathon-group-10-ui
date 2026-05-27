@@ -43,7 +43,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { PropertyListing } from '@/types/property'
 
-type MatchSource = 'database' | 'fallback' | null
+type MatchSource = 'database' | 'database+llm' | 'database+relaxed' | 'fallback' | null
 
 export function DashboardPage() {
   const navigate = useNavigate()
@@ -56,6 +56,7 @@ export function DashboardPage() {
   const [loadingMatches, setLoadingMatches] = useState(false)
   const [searchResults, setSearchResults] = useState<PropertyListing[]>([])
   const [matchSource, setMatchSource] = useState<MatchSource>(null)
+  const [matchRelaxed, setMatchRelaxed] = useState(false)
   const [contactProperty, setContactProperty] = useState<PropertyListing | null>(null)
   const [savedSearchText, setSavedSearchText] = useState('')
   const [page, setPage] = useState(1)
@@ -129,6 +130,7 @@ export function DashboardPage() {
     if (!parsedRequirement) {
       setSearchResults([])
       setMatchSource(null)
+      setMatchRelaxed(false)
       return
     }
 
@@ -144,8 +146,16 @@ export function DashboardPage() {
           return
         }
 
-        setSearchResults(response.items.map(mapMatchedItemToListing))
-        setMatchSource('database')
+        const mapped = response.items.map(mapMatchedItemToListing)
+        setSearchResults(filterByParsedRequirement(mapped, response.parsed, { relaxed: response.relaxed }))
+        setMatchRelaxed(Boolean(response.relaxed))
+        setMatchSource(
+          response.source === 'database+llm'
+            ? 'database+llm'
+            : response.source === 'database+relaxed'
+              ? 'database+relaxed'
+              : 'database',
+        )
         setParsedRequirement(response.parsed)
       } catch {
         if (cancelled) {
@@ -169,12 +179,23 @@ export function DashboardPage() {
   }, [parsedRequirement?.raw_text, setParsedRequirement])
 
   const isSearchMode = Boolean(parsedRequirement)
+  const filteredSearchResults = useMemo(() => {
+    if (!parsedRequirement) {
+      return searchResults
+    }
+    return filterByParsedRequirement(searchResults, parsedRequirement, { relaxed: matchRelaxed })
+  }, [searchResults, parsedRequirement, matchRelaxed])
+
   const resultsLabel = isSearchMode
-    ? matchSource === 'database'
-      ? `${searchResults.length} matches from database`
+    ? matchSource === 'database+llm'
+      ? `${filteredSearchResults.length} AI-ranked matches from database`
+      : matchSource === 'database+relaxed'
+        ? `${filteredSearchResults.length} similar matches (no exact rent listings in database)`
+      : matchSource === 'database'
+      ? `${filteredSearchResults.length} matches from database`
       : matchSource === 'fallback'
-        ? `${searchResults.length} offline matches (API unavailable)`
-        : `${searchResults.length} listings match your AI search`
+        ? `${filteredSearchResults.length} offline matches (API unavailable)`
+        : `${filteredSearchResults.length} listings match your AI search`
     : `${properties.length} listings available now`
 
   const paginated = useMemo(
@@ -183,17 +204,32 @@ export function DashboardPage() {
   )
 
   const searchPaginated = useMemo(
-    () => paginateProperties(searchResults, searchPage, searchPageSize),
-    [searchResults, searchPage],
+    () => paginateProperties(filteredSearchResults, searchPage, searchPageSize),
+    [filteredSearchResults, searchPage],
   )
 
-  const stats = useMemo(() => getDashboardStats(properties), [properties])
-  const priceIndexTrend = useMemo(() => getPriceIndexTrend(properties), [properties])
-  const trendingLocations = useMemo(() => getTrendingLocations(properties), [properties])
-  const priceInsights = useMemo(
-    () => getPriceInsights(properties, priceIndexTrend),
-    [properties, priceIndexTrend],
+  const analyticsProperties = useMemo(
+    () => (isSearchMode ? filteredSearchResults : properties),
+    [isSearchMode, filteredSearchResults, properties],
   )
+
+  const stats = useMemo(
+    () => getDashboardStats(analyticsProperties, isSearchMode ? parsedRequirement?.city : null),
+    [analyticsProperties, isSearchMode, parsedRequirement?.city],
+  )
+  const priceIndexTrend = useMemo(() => getPriceIndexTrend(analyticsProperties), [analyticsProperties])
+  const trendingLocations = useMemo(
+    () => getTrendingLocations(analyticsProperties, isSearchMode ? parsedRequirement?.city : null),
+    [analyticsProperties, isSearchMode, parsedRequirement?.city],
+  )
+  const priceInsights = useMemo(
+    () => getPriceInsights(analyticsProperties, priceIndexTrend),
+    [analyticsProperties, priceIndexTrend],
+  )
+
+  const searchCityLabel = parsedRequirement?.city
+    ? parsedRequirement.city.charAt(0).toUpperCase() + parsedRequirement.city.slice(1)
+    : null
 
   useEffect(() => {
     setSearchPage(1)
@@ -215,6 +251,12 @@ export function DashboardPage() {
             onSearch={setParsedRequirement}
           />
 
+          {isSearchMode && parsedRequirement?.parser.includes('llm') && (
+            <div className="flex flex-wrap items-center gap-2 px-1">
+              <Badge variant="outline">OpenAI-enhanced search query</Badge>
+            </div>
+          )}
+
           {isSearchMode && (
             <Section
               title="Matching properties"
@@ -222,6 +264,10 @@ export function DashboardPage() {
               className="!space-y-4"
               action={
                 <>
+                  {matchSource === 'database+relaxed' && (
+                    <Badge variant="warning">Similar matches — upload or scrape rent listings for exact results</Badge>
+                  )}
+                  {matchSource === 'database+llm' && <Badge variant="success">OpenAI-ranked matches</Badge>}
                   {matchSource === 'database' && <Badge variant="success">Database matches</Badge>}
                   {matchSource === 'fallback' && <Badge variant="warning">Offline fallback</Badge>}
                   {loadingMatches && <Badge variant="secondary">Matching…</Badge>}
@@ -234,7 +280,7 @@ export function DashboardPage() {
                 onToggleFavorite={toggleFavorite}
                 loading={loadingMatches}
                 showCompareAction
-                showMatchDetails={matchSource === 'database'}
+                showMatchDetails={matchSource === 'database' || matchSource === 'database+llm' || matchSource === 'database+relaxed'}
                 onContactProperty={setContactProperty}
                 onViewProperty={(property) => navigate(`/properties/${toRoutePropertyId(property.id)}`)}
                 emptyTitle="No matching properties"
@@ -254,15 +300,39 @@ export function DashboardPage() {
 
         <CompareSelectionBanner />
 
-        <StatsWidgets stats={stats} />
+        <StatsWidgets stats={stats} searchContext={isSearchMode} />
 
         <section className="space-y-4">
+          {isSearchMode && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">Market insights from your search</Badge>
+              {searchCityLabel && (
+                <Badge variant="outline">Filtered for {searchCityLabel}</Badge>
+              )}
+            </div>
+          )}
           <div className="grid gap-6 xl:grid-cols-12">
             <div className="xl:col-span-8">
-              <PriceIndexTrend data={priceIndexTrend} />
+              <PriceIndexTrend
+                data={priceIndexTrend}
+                description={
+                  isSearchMode
+                    ? `Average price per sq.ft for ${analyticsProperties.length} matching listings`
+                    : undefined
+                }
+              />
             </div>
             <div className="xl:col-span-4">
-              <TrendingLocations locations={trendingLocations} />
+              <TrendingLocations
+                locations={trendingLocations}
+                description={
+                  isSearchMode
+                    ? searchCityLabel
+                      ? `Localities in ${searchCityLabel} from your matching results`
+                      : 'Localities in your matching results'
+                    : undefined
+                }
+              />
             </div>
           </div>
           <PriceInsightCards
@@ -270,6 +340,7 @@ export function DashboardPage() {
             topCategoryCount={priceInsights.topCategoryCount}
             rentals={priceInsights.rentals}
             avgGrowth={priceInsights.avgGrowth}
+            searchContext={isSearchMode}
           />
         </section>
 

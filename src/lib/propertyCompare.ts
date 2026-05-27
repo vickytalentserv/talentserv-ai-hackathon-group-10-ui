@@ -1,4 +1,4 @@
-import { formatPrice } from '@/lib/utils'
+import { formatListingPrice, formatPrice } from '@/lib/utils'
 import type { PropertyListing } from '@/types/property'
 
 export const MIN_COMPARE_COUNT = 2
@@ -48,9 +48,8 @@ function pricePerSqft(property: PropertyListing): number {
   return property.sqft > 0 ? property.price / property.sqft : 0
 }
 
-function formatListingPrice(property: PropertyListing): string {
-  const base = formatPrice(property.price, property.currency)
-  return property.listingStatus === 'rent' ? `${base}/mo` : base
+function getListingPriceLabel(property: PropertyListing): string {
+  return formatListingPrice(property.price, property.listingStatus, property.currency)
 }
 
 export function buildPriceChartData(properties: PropertyListing[]): CompareChartPoint[] {
@@ -157,7 +156,7 @@ export function buildOverallComparisonMetrics(properties: PropertyListing[]): Co
       description: 'Lower price within this comparison set scores higher',
       icon: 'value',
       score: (property) => Math.round((1 - property.price / maxPrice) * 100),
-      display: formatListingPrice,
+      display: getListingPriceLabel,
     },
     {
       id: 'area',
@@ -281,7 +280,7 @@ export function buildMultiCompareRows(properties: PropertyListing[]): CompareAtt
   return [
     {
       label: 'Price',
-      values: properties.map(formatListingPrice),
+      values: properties.map(getListingPriceLabel),
       hint: 'Compare listings with the same buy/rent intent',
     },
     {

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { Bath, BedDouble, GitCompare, Heart, MapPin, Maximize2, Phone, Star } from 'lucide-react'
 import type { PropertyListing } from '@/types/property'
 import { useCompareContext } from '@/context/CompareContext'
-import { cn, formatPrice } from '@/lib/utils'
+import { cn, formatListingPrice } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -36,10 +36,7 @@ export function PropertyCard({
   const { isInCompare, toggleCompare, canAddToCompare } = useCompareContext()
   const compareSelected = isInCompare(property.id)
   const compareDisabled = !compareSelected && !canAddToCompare
-  const priceLabel =
-    property.listingStatus === 'rent'
-      ? `${formatPrice(property.price, property.currency)}/mo`
-      : formatPrice(property.price, property.currency)
+  const priceLabel = formatListingPrice(property.price, property.listingStatus, property.currency)
 
   const typeLabel = formatPropertyType(property.propertyType)
 
@@ -52,8 +49,8 @@ export function PropertyCard({
     >
       <Card
         className={cn(
-          'group flex h-full flex-col overflow-hidden border-border/80 transition-shadow hover:shadow-card',
-          compareSelected && showCompareAction && 'ring-2 ring-primary/20',
+          'property-card-hover group flex h-full flex-col overflow-hidden border-border/80',
+          compareSelected && showCompareAction && 'ring-2 ring-primary/30',
         )}
       >
         <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-muted">
@@ -63,7 +60,7 @@ export function PropertyCard({
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             loading="lazy"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/5 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[hsl(224_56%_16%/0.75)] via-[hsl(224_56%_16%/0.15)] to-transparent" />
 
           <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
             <Badge className="border-0 bg-highlight text-highlight-foreground shadow-soft">Featured</Badge>
@@ -111,7 +108,7 @@ export function PropertyCard({
             </p>
           </div>
 
-          <p className="text-lg font-bold text-foreground">{priceLabel}</p>
+          <p className="text-lg font-bold text-primary">{priceLabel}</p>
 
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">

@@ -9,7 +9,7 @@ import { AppShell } from '@/components/layout/AppShell'
 import { ContactInquiryModal } from '@/components/properties/ContactInquiryModal'
 import { parseRoutePropertyId, toRoutePropertyId } from '@/lib/listingKeys'
 import { mapApiPropertyToListing } from '@/lib/propertyMapper'
-import { cn, formatPrice } from '@/lib/utils'
+import { cn, formatListingPrice } from '@/lib/utils'
 import type { PropertyListing } from '@/types/property'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -81,12 +81,9 @@ export function PropertyDetailPage() {
   const compareSelected = property ? isInCompare(property.id) : false
   const compareDisabled = property ? !compareSelected && !canAddToCompare : true
 
-  const priceLabel =
-    property?.listingStatus === 'rent'
-      ? `${formatPrice(property.price, property.currency)}/mo`
-      : property
-        ? formatPrice(property.price, property.currency)
-        : ''
+  const priceLabel = property
+    ? formatListingPrice(property.price, property.listingStatus, property.currency)
+    : ''
 
   return (
     <AppShell profileName={user?.name} profilePicture={user?.picture}>

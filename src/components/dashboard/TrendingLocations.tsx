@@ -7,9 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface TrendingLocationsProps {
   locations: TrendingLocation[]
+  description?: string
 }
 
-export function TrendingLocations({ locations }: TrendingLocationsProps) {
+export function TrendingLocations({
+  locations,
+  description = 'Most searched localities this month',
+}: TrendingLocationsProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -19,13 +23,13 @@ export function TrendingLocations({ locations }: TrendingLocationsProps) {
       <Card className="h-full">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold">Trending Locations</CardTitle>
-          <CardDescription>Most searched localities this month</CardDescription>
+          <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {locations.map((location, index) => (
             <div
               key={location.name}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-3 py-2.5"
+              className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-gradient-to-r from-muted/30 to-transparent px-3 py-2.5 transition-colors hover:border-primary/20 hover:from-primary/5"
             >
               <div className="flex min-w-0 items-center gap-3">
                 <div className="icon-tile-blue h-9 w-9 shrink-0">
@@ -56,6 +60,7 @@ interface PriceInsightCardsProps {
   topCategoryCount: number
   rentals: number
   avgGrowth: string
+  searchContext?: boolean
 }
 
 export function PriceInsightCards({
@@ -63,22 +68,23 @@ export function PriceInsightCards({
   topCategoryCount,
   rentals,
   avgGrowth,
+  searchContext = false,
 }: PriceInsightCardsProps) {
   const cards = [
     {
       label: 'Most Popular Category',
       value: topCategory.charAt(0).toUpperCase() + topCategory.slice(1),
-      sub: String(topCategoryCount),
+      sub: `${topCategoryCount} in results`,
     },
     {
       label: 'Rentals Insight',
       value: String(rentals),
-      sub: 'High demand in IT corridors',
+      sub: searchContext ? 'Rent listings in your search' : 'High demand in IT corridors',
     },
     {
       label: 'Avg. Growth',
       value: `+${avgGrowth}%`,
-      sub: 'Across top localities',
+      sub: searchContext ? 'Based on matching localities' : 'Across top localities',
     },
   ]
 

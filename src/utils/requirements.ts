@@ -1,13 +1,29 @@
 import type { ParsedRequirement } from '../api/client'
 
+export function normalizeBudgetCurrency(currency: string, rawText = ''): 'INR' | 'USD' {
+  const raw = rawText.toLowerCase()
+  if (raw.includes('$') || raw.includes('usd') || raw.includes('dollar')) {
+    return currency === 'USD' ? 'USD' : 'INR'
+  }
+  return 'INR'
+}
+
 export function formatBudget(
   min: number | null | undefined,
   max: number | null | undefined,
-  currency: string,
+  _currency: string,
+  _rawText = '',
 ): string {
-  const symbol = currency === 'INR' ? '₹' : '$'
-  const format = (value: number) =>
-    `${symbol}${new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US').format(value)}`
+  const format = (value: number) => {
+    const symbol = '₹'
+    if (value >= 10_000_000) {
+      return `${symbol}${(value / 10_000_000).toFixed(2)} Cr`
+    }
+    if (value >= 100_000) {
+      return `${symbol}${(value / 100_000).toFixed(2)} L`
+    }
+    return `${symbol}${new Intl.NumberFormat('en-IN').format(value)}`
+  }
 
   if (min != null && max != null) {
     return `${format(min)} – ${format(max)}`

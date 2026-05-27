@@ -34,7 +34,7 @@ export function ParsedFiltersPanel({ parsed, saved }: ParsedFiltersPanelProps) {
     },
     {
       label: 'Budget',
-      value: formatBudget(parsed.budget_min, parsed.budget_max, parsed.budget_currency),
+      value: formatBudget(parsed.budget_min, parsed.budget_max, parsed.budget_currency, parsed.raw_text),
     },
     { label: 'City', value: formatValue(parsed.city) },
     { label: 'Locality', value: formatValue(parsed.locality) },

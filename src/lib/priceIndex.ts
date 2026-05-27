@@ -1,4 +1,5 @@
 import type { PropertyListing } from '@/types/property'
+import { normalizePlaceName, normalizeCityName, resolvePropertyLocality, titleCasePlace, propertyMatchesCity } from '@/lib/locality'
 
 export interface PriceIndexPoint {
   month: string
@@ -41,20 +42,55 @@ export function getPriceIndexTrend(properties: PropertyListing[]): PriceIndexPoi
   return buildTrend(base)
 }
 
-export function getTrendingLocations(properties: PropertyListing[]): TrendingLocation[] {
-  const counts = properties.reduce<Record<string, number>>((acc, property) => {
-    const key = property.locality ?? property.city
-    acc[key] = (acc[key] ?? 0) + 1
-    return acc
-  }, {})
+export function getTrendingLocations(
+  properties: PropertyListing[],
+  focusCity?: string | null,
+): TrendingLocation[] {
+  const scoped = focusCity
+    ? properties.filter((property) => propertyMatchesCity(property, focusCity))
+    : properties
 
-  return Object.entries(counts)
-    .sort((a, b) => b[1] - a[1])
+  const counts = new Map<string, { display: string; count: number }>()
+
+  for (const property of scoped) {
+    const locality = resolvePropertyLocality(property)
+    if (!locality) {
+      continue
+    }
+
+    const key = normalizePlaceName(locality)
+    const existing = counts.get(key)
+    if (existing) {
+      existing.count += 1
+    } else {
+      counts.set(key, { display: titleCasePlace(locality), count: 1 })
+    }
+  }
+
+  if (counts.size === 0 && scoped.length > 0 && !focusCity) {
+    const cityCounts = scoped.reduce<Record<string, number>>((acc, property) => {
+      const key = normalizeCityName(property.city)
+      acc[key] = (acc[key] ?? 0) + 1
+      return acc
+    }, {})
+
+    return Object.entries(cityCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, listings], index) => ({
+        name: titleCasePlace(name),
+        listings,
+        growth: Number((6.5 + index * 1.8 + (listings % 4) * 0.7).toFixed(1)),
+      }))
+  }
+
+  return Array.from(counts.values())
+    .sort((a, b) => b.count - a.count)
     .slice(0, 5)
-    .map(([name, listings], index) => ({
-      name,
-      listings,
-      growth: Number((6.5 + index * 1.8 + (listings % 4) * 0.7).toFixed(1)),
+    .map(({ display, count }, index) => ({
+      name: display,
+      listings: count,
+      growth: Number((6.5 + index * 1.8 + (count % 4) * 0.7).toFixed(1)),
     }))
 }
 
